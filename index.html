@@ -4,64 +4,83 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Simple Sheet PRO</title> 
+    
+    <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+
     <style>
-        body { font-family: Arial, sans-serif; padding: 15px; background-color: #f4f4f4; margin: 0; }
-        .app-grid { display: flex; gap: 20px; max-width: 1400px; margin: 0 auto; }
-        .calculator-container { flex: 3; min-width: 320px; background-color: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); }
+        /* 前回より10%ほど全体をコンパクト化 */
+        body { font-family: sans-serif; padding: 8px; background-color: #f0f2f5; margin: 0; box-sizing: border-box; font-size: 16px; }
+        * { box-sizing: border-box; }
+        .app-grid { display: flex; gap: 12px; max-width: 1400px; margin: 0 auto; }
+        .calculator-container { flex: 3; min-width: 310px; background-color: #fff; padding: 12px; border-radius: 10px; box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1); }
         
-        /* 電卓スタイル */
-        .side-calc { flex: 1; min-width: 280px; background: #333; padding: 15px; border-radius: 8px; color: white; height: fit-content; position: sticky; top: 15px; }
-        .calc-display-container { display: flex; gap: 5px; margin-bottom: 10px; }
-        .calc-display { flex: 1; height: 50px; background: #222; border: none; color: #fff; text-align: right; font-size: 1.5em; padding: 10px; border-radius: 4px; width: 100%; }
-        .calc-copy-btn { width: 50px; background: #007bff; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 1.2em; }
-        .calc-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-        .calc-btn { padding: 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 1.1em; font-weight: bold; background: #555; color: white; }
+        /* 電卓サイズ調整 */
+        .side-calc { flex: 1; min-width: 280px; background: #333; padding: 12px; border-radius: 10px; color: white; height: fit-content; position: sticky; top: 8px; }
+        .calc-display { width: 100%; height: 52px; background: #222; border: none; color: #fff; text-align: right; font-size: 1.8em; padding: 8px; border-radius: 6px; margin-bottom: 8px; }
+        .calc-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+        .calc-btn { padding: 15px; border: none; border-radius: 6px; cursor: pointer; font-size: 1.25em; font-weight: bold; background: #555; color: white; }
         .calc-btn.op { background: #f39c12; }
         .calc-btn.equal { background: #27ae60; grid-column: span 2; }
         .calc-btn.clear { background: #c0392b; }
+        .calc-toggle-btn { display: none; position: fixed; bottom: 15px; right: 15px; width: 60px; height: 60px; border-radius: 50%; background: #333; color: white; border: none; font-size: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); z-index: 1001; }
 
-        /* スマホ用トグル */
-        .calc-toggle-btn { display: none; position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; border-radius: 50%; background: #333; color: white; border: none; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1001; cursor: pointer; }
-
-        /* 共通UI */
-        h2 { text-align: center; color: #333; margin-bottom: 15px; font-size: 1.2em; }
-        .top-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 8px; }
-        .master-name-group { flex: 1; display: flex; align-items: center; border: 1px solid #ced4da; border-radius: 5px; padding: 0 8px; background-color: #f0f8ff; min-width: 150px; height: 38px; }
-        .master-name-input { flex-grow: 1; border: none; font-size: 0.9em; outline: none; background: transparent; width: 100%; }
-        .lang-switch { display: flex; gap: 2px; }
-        .lang-button { background: #e9ecef; border: 1px solid #ced4da; padding: 4px; cursor: pointer; border-radius: 4px; font-size: 0.75em; min-width: 32px; height: 38px; }
+        /* ヘッダー */
+        h2 { text-align: center; color: #333; margin: 2px 0 12px; font-size: 1.3em; }
+        .top-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
+        .master-name-group { flex: 1; display: flex; align-items: center; border: 2px solid #007bff; border-radius: 6px; padding: 4px 10px; background-color: #fff; min-width: 160px; }
+        .master-name-input { flex-grow: 1; border: none; font-size: 1em; outline: none; font-weight: bold; width: 100%; }
+        .lang-switch { display: flex; gap: 3px; flex-wrap: wrap; justify-content: flex-end; }
+        .lang-button { background: #e9ecef; border: 1px solid #ccc; padding: 5px 8px; cursor: pointer; border-radius: 5px; font-size: 0.75em; min-width: 40px; font-weight: bold; }
         .lang-button.active { background-color: #007bff; color: white; border-color: #007bff; }
-        .utility-bar { display: flex; justify-content: center; gap: 5px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee; flex-wrap: wrap; }
-        .util-btn { border: none; background: #6c757d; color: white; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 0.8em; font-weight: bold; }
-        .mode-toggle { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
-        .mode-button { padding: 8px 16px; border: none; background: #eee; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.9em; }
+        
+        .utility-bar { display: flex; justify-content: center; gap: 6px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #eee; flex-wrap: wrap; }
+        .util-btn { border: none; background: #6c757d; color: white; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.9em; font-weight: bold; }
+        .mode-toggle { display: flex; justify-content: center; gap: 8px; margin-bottom: 12px; }
+        .mode-button { flex: 1; max-width: 200px; padding: 12px; border: none; background: #ddd; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1em; }
         .mode-button.active { background-color: #007bff; color: white; }
 
-        .master-row { padding: 10px 15px; margin-bottom: 15px; border: 3px solid #dc3545; border-radius: 8px; background-color: #ffeaea; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-        .master-input { flex-grow: 1; max-width: 150px; padding: 8px; border: 2px solid #dc3545; border-radius: 5px; font-size: 1.2em; text-align: right; font-weight: bold; }
-        .row { display: flex; align-items: center; margin-bottom: 8px; padding: 8px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9; flex-wrap: wrap; }
-        .text-label-input { flex: 2; padding: 8px; border: 1px solid #aaa; border-radius: 5px; margin-right: 5px; min-width: 100px; }
-        .multiplier-input { width: 65px; padding: 8px; border: 2px solid #007bff; border-radius: 5px; text-align: right; font-weight: bold; }
-        .result-text { font-size: 1.4em; font-weight: bold; color: #007bff; }
-        .percent-toggle, .base-toggle { border: 1px solid #ccc; border-radius: 5px; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-weight: bold; background: #fff; margin: 0 5px; flex-shrink: 0; }
+        /* 元の数字（Base Value） */
+        .master-row { padding: 12px; margin-bottom: 12px; border: 3px solid #dc3545; border-radius: 10px; background-color: #fff; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .master-label-start { font-weight: bold; color: #dc3545; font-size: 1.1em; }
+        .master-input { flex: 0 0 160px; padding: 8px; border: 2px solid #dc3545; border-radius: 6px; font-size: 1.6em; text-align: right; font-weight: bold; }
+
+        /* 計算行のバランス */
+        .row { display: flex; align-items: center; margin-bottom: 8px; padding: 10px 12px; border: 1px solid #ccc; border-radius: 10px; background-color: #fff; flex-wrap: nowrap; gap: 6px; }
+        .text-label-input { flex: 1.5; min-width: 90px; padding: 10px; border: 1px solid #bbb; border-radius: 6px; font-size: 1em; font-weight: bold; }
+        
+        /* 演算子（黒枠）：スリムを維持 */
+        .operator-group { display: flex; flex-direction: column; align-items: center; width: 22px; flex-shrink: 0; }
+        .operator-control { font-size: 0.5em; background: #333; color: #fff; width: 100%; height: 16px; display: flex; justify-content: center; align-items: center; border-radius: 3px; cursor: pointer; }
+        .operator-display { font-size: 1.4em; font-weight: bold; text-align: center; color: #000; width: 100%; height: 30px; line-height: 30px; }
+
+        /* 入力数値（青枠）：十分な広さを確保 */
+        .multiplier-input { flex: 2; min-width: 110px; padding: 10px 6px; border: 3px solid #007bff; border-radius: 6px; text-align: right; font-weight: bold; font-size: 1.4em; }
+        
+        .percent-toggle, .base-toggle { border: 2px solid #ccc; border-radius: 6px; width: 48px; height: 48px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-weight: bold; background: #fff; flex-shrink: 0; font-size: 1.2em; }
         .percent-toggle.active { background: #dc3545; color: #fff; border-color: #dc3545; }
-        .percent-toggle { color: #ccc; }
-        .base-toggle { color: #333; font-size: 1.2em; }
-        .operator-group { display: flex; flex-direction: column; align-items: center; margin: 0 8px; }
-        .operator-control { font-size: 0.7em; background: #6c757d; color: #fff; width: 18px; height: 18px; display: flex; justify-content: center; align-items: center; border-radius: 3px; cursor: pointer; }
-        .operator-display { font-size: 1.5em; font-weight: bold; width: 35px; text-align: center; }
+        
+        /* 計算結果（答え）：最初から広めに固定 */
+        .result-group { flex: 2.5; display: flex; align-items: center; justify-content: flex-end; gap: 6px; min-width: 160px; background: #f8f9fa; padding: 4px 8px; border-radius: 6px; border: 1px inset #eee; }
+        .result-text { font-size: 1.6em; font-weight: bold; color: #007bff; white-space: nowrap; }
+        .action-btn { border: none; background: none; cursor: pointer; font-size: 1.5em; padding: 0 4px; opacity: 0.7; }
 
         @media screen and (max-width: 900px) {
-            .side-calc { display: none; position: fixed; bottom: 90px; right: 20px; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 280px; }
+            .side-calc { display: none; position: fixed; bottom: 85px; right: 15px; z-index: 1000; box-shadow: 0 8px 30px rgba(0,0,0,0.5); width: 300px; }
             .calc-toggle-btn { display: block; }
-            .side-calc.active { display: block; animation: slideUp 0.3s ease; }
+            .side-calc.active { display: block; }
         }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @media screen and (max-width: 600px) {
-            .text-label-input { flex: 1 1 100%; margin-bottom: 5px; }
-            .result-group { flex: 1 1 100%; border-top: 1px solid #eee; padding-top: 8px; margin-top: 5px; justify-content: flex-end; display: flex; align-items: center; gap: 10px; }
+        
+        @media screen and (max-width: 650px) {
+            .row { flex-wrap: wrap; }
+            .text-label-input { flex: 1 1 100%; order: 1; margin-bottom: 4px; }
+            .operator-group { order: 2; }
+            .multiplier-input { flex: 1; order: 3; }
+            .percent-toggle, .base-toggle { order: 4; }
+            .result-group { flex: 1 1 100%; order: 5; margin-top: 6px; padding: 8px; }
         }
-        #saveMessage { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px 20px; border-radius: 20px; opacity: 0; transition: opacity 0.3s; z-index: 2000; pointer-events: none; }
+        #saveMessage { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px 20px; border-radius: 25px; opacity: 0; transition: opacity 0.3s; z-index: 2000; pointer-events: none; font-weight: bold; font-size: 0.9em; }
     </style>
 </head>
 <body onload="init()">
@@ -73,7 +92,7 @@
         <div class="calculator-container">
             <div class="top-controls">
                 <div class="master-name-group">
-                    <label id="masterLabelName" style="font-size: 0.7em; color: #007bff; font-weight: bold; margin-right: 5px;">Name:</label>
+                    <label id="masterLabelName" style="font-size: 0.75em; color: #007bff; font-weight: bold; margin-right: 6px;">Name:</label>
                     <input type="text" id="masterLabel" class="master-name-input" oninput="saveSettings()">
                 </div>
                 <div class="lang-switch">
@@ -101,18 +120,18 @@
                 <button id="customSimpleBtn" class="mode-button" onclick="switchMode('customSimple')">Sequential</button>
             </div>
 
-            <div style="text-align: center; margin-bottom: 20px;">
-                <select id="presetSelector" onchange="loadPreset()" style="padding: 8px; border-radius: 4px; border: 1px solid #ced4da; width: 60%;"></select>
-                <button class="lang-button" id="savePresetBtn" onclick="savePreset()" style="width:auto; padding:8px 12px;">Save</button>
+            <div style="text-align: center; margin-bottom: 12px; display: flex; gap: 6px; justify-content: center;">
+                <select id="presetSelector" onchange="loadPreset()" style="padding: 10px; border-radius: 6px; border: 2px solid #ccc; width: 65%; font-size: 1em; font-weight: bold;"></select>
+                <button class="lang-button" id="savePresetBtn" onclick="savePreset()" style="width:auto; padding:0 15px; font-weight: bold; font-size: 0.9em;">Save</button>
             </div>
 
             <div id="smart-sheet-mode">
                 <div class="master-row">
-                    <label id="masterLabelStart" style="font-weight: bold; color: #dc3545; font-size: 0.8em;">Base Value</label>
+                    <label id="masterLabelStart" class="master-label-start">Base Value</label>
                     <input type="number" id="masterInput" class="master-input" value="1000" oninput="updateDisplay()">
                 </div>
                 <div id="rows-container-smart"></div>
-                <div style="text-align: center; margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
+                <div style="text-align: center; margin-top: 15px; display: flex; justify-content: center; gap: 8px;">
                     <button class="mode-button" id="addBtnInd" style="background:#28a745; color:white;" onclick="addRowSmart()">+ Row</button>
                     <button class="mode-button" id="copyBtnInd" style="background:#007bff; color:white;" onclick="copyPage('smart')">Copy All</button>
                 </div>
@@ -120,29 +139,28 @@
 
             <div id="custom-simple-mode" style="display: none;">
                 <div class="master-row">
-                    <label id="masterLabelStartSimple" style="font-weight: bold; color: #dc3545; font-size: 0.8em;">Base Value</label>
+                    <label id="masterLabelStartSimple" class="master-label-start">Base Value</label>
                     <input type="number" id="masterInputSimple" class="master-input" value="1000" oninput="updateDisplay()">
                 </div>
                 <div id="rows-container-simple"></div>
-                <div style="text-align: center; margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
+                <div style="text-align: center; margin-top: 15px; display: flex; justify-content: center; gap: 8px;">
                     <button class="mode-button" id="addBtnSeq" style="background:#28a745; color:white;" onclick="addRowSimple()">+ Row</button>
                     <button class="mode-button" id="copyBtnSeq" style="background:#007bff; color:white;" onclick="copyPage('custom')">Copy All</button>
                 </div>
-                <div style="margin-top: 20px; padding: 15px; border: 3px solid #28a745; border-radius: 8px; background:#e6ffed; text-align: center;">
-                    <div id="finalTotalLabel" style="font-weight: bold; font-size: 0.8em;">Final Total</div>
-                    <div id="finalResultTextCustom" style="font-size: 2em; font-weight: bold; color: #28a745;">0</div>
+                <div style="margin-top: 15px; padding: 20px; border: 3px solid #28a745; border-radius: 12px; background:#e6ffed; text-align: center;">
+                    <div id="finalTotalLabel" style="font-weight: bold; font-size: 1.1em; color: #28a745;">Final Total</div>
+                    <div id="finalResultTextCustom" style="font-size: 3em; font-weight: bold; color: #28a745;">0</div>
                 </div>
             </div>
         </div>
 
         <div id="sideCalc" class="side-calc">
             <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <h3 id="calcTitle" style="margin:0; font-size:1em;">Calculator</h3>
-                <button class="util-btn" style="padding: 2px 8px; background: #c0392b; display: none;" id="calcCloseBtn" onclick="toggleCalc()">×</button>
+                <h3 id="calcTitle" style="margin:0; font-size: 1.1em;">Calculator</h3>
             </div>
-            <div class="calc-display-container">
+            <div style="display:flex; gap:5px;">
                 <input type="text" id="calcDisplay" class="calc-display" readonly value="0">
-                <button class="calc-copy-btn" onclick="copyCalcResult()">📋</button>
+                <button class="calc-btn" style="background:#007bff; height:52px; width:52px; padding:0;" onclick="copyCalcResult()">📋</button>
             </div>
             <div class="calc-buttons">
                 <button class="calc-btn clear" onclick="calcClear()">C</button>
@@ -167,23 +185,22 @@
     </div>
 
     <script>
-        // 電卓ロジック
+        // ロジック（計算・言語・保存）は前回を継承
         let currentCalc = "0";
         function calcInput(v) { if(currentCalc === "0" && !isNaN(v)) currentCalc = v; else currentCalc += v; document.getElementById('calcDisplay').value = currentCalc; }
         function calcClear() { currentCalc = "0"; document.getElementById('calcDisplay').value = currentCalc; }
         function calcResult() { try { currentCalc = eval(currentCalc).toString(); } catch(e) { currentCalc = "Error"; } document.getElementById('calcDisplay').value = currentCalc; }
         function copyCalcResult() { const val = document.getElementById('calcDisplay').value; if(val === "Error") return; navigator.clipboard.writeText(val); showMsg(languageMap[currentLanguage].copyMsg); }
-        function toggleCalc() { const el = document.getElementById('sideCalc'); el.classList.toggle('active'); document.getElementById('calcCloseBtn').style.display = el.classList.contains('active') ? 'block' : 'none'; }
+        function toggleCalc() { const el = document.getElementById('sideCalc'); el.classList.toggle('active'); }
 
-        // 【完全復元】全言語翻訳データ
         const languageMap = {
-            en: { title: "Simple Sheet PRO", modeInd: "Independent", modeSeq: "Sequential", masterLabelName: "Name:", masterLabelStart: "Base Value", savePreset: "Save", finalTotal: "Final Total", copyMsg: "Copied!", btnClear: "Clear", btnExport: "Exp", btnImport: "Imp", btnReset: "Reset", confirmReset: "Reset all data?", promptImport: "Paste Export data:", addRow: "+ Row", copyAll: "Copy All", loadInd: "-- Load Independent --", loadSeq: "-- Load Sequential --", calcTitle: "Calculator" },
-            ja: { title: "シンプルシート PRO", modeInd: "独立計算", modeSeq: "連続計算", masterLabelName: "計算名:", masterLabelStart: "元の数字", savePreset: "保存", finalTotal: "最終合計", copyMsg: "コピー完了", btnClear: "クリア", btnExport: "出力", btnImport: "読込", btnReset: "初期化", confirmReset: "全てのデータをリセットしますか？", promptImport: "出力データを貼り付けてください:", addRow: "+ 行追加", copyAll: "全コピー", loadInd: "-- 独立計算を読込 --", loadSeq: "-- 連続計算を読込 --", calcTitle: "一般計算機" },
-            zh: { title: "简单计算表 PRO", modeInd: "独立计算", modeSeq: "连续计算", masterLabelName: "名称:", masterLabelStart: "初始值", savePreset: "保存", finalTotal: "最终合计", copyMsg: "已复制", btnClear: "清除", btnExport: "导出", btnImport: "导入", btnReset: "重置", confirmReset: "重置所有数据？", promptImport: "粘贴导出数据:", addRow: "+ 添加行", copyAll: "复制全部", loadInd: "-- 读取独立计算 --", loadSeq: "-- 读取连续计算 --", calcTitle: "计算器" },
-            ko: { title: "심플 시트 PRO", modeInd: "독립 계산", modeSeq: "연속 계산", masterLabelName: "이름:", masterLabelStart: "기준 숫자", savePreset: "저장", finalTotal: "최종 합계", copyMsg: "복사됨", btnClear: "지우기", btnExport: "내보내기", btnImport: "가져오기", btnReset: "초기화", confirmReset: "모든 데이터를 초기화할까요?", promptImport: "내보낸 데이터를 붙여넣으세요:", addRow: "+ 행 추가", copyAll: "전체 복사", loadInd: "-- 독립 계산 가져오기 --", loadSeq: "-- 연속 계산 가져오기 --", calcTitle: "계산기" },
-            es: { title: "Hoja Simple PRO", modeInd: "Independiente", modeSeq: "Secuencial", masterLabelName: "Nombre:", masterLabelStart: "Valor Base", savePreset: "Guardar", finalTotal: "Total Final", copyMsg: "¡Copiado!", btnClear: "Limpiar", btnExport: "Exp", btnImport: "Imp", btnReset: "Reset", confirmReset: "¿Reiniciar todos los datos?", promptImport: "Pegue los datos exportados:", addRow: "+ Fila", copyAll: "Copiar todo", loadInd: "-- Cargar Independiente --", loadSeq: "-- Cargar Secuencial --", calcTitle: "Calculadora" },
-            fr: { title: "Feuille Simple PRO", modeInd: "Indépendant", modeSeq: "Séquentiel", masterLabelName: "Nom:", masterLabelStart: "Valeur de base", savePreset: "Sauver", finalTotal: "Total Final", copyMsg: "Copié !", btnClear: "Effacer", btnExport: "Exp", btnImport: "Imp", btnReset: "Reset", confirmReset: "Réinitialiser toutes les données ?", promptImport: "Collez les données exportées :", addRow: "+ Ligne", copyAll: "Tout copier", loadInd: "-- Charger Indépendant --", loadSeq: "-- Charger Séquentiel --", calcTitle: "Calculatrice" },
-            pt: { title: "Folha Simples PRO", modeInd: "Independente", modeSeq: "Sequencial", masterLabelName: "Nome:", masterLabelStart: "Valor Base", savePreset: "Salvar", finalTotal: "Total Final", copyMsg: "Copiado!", btnClear: "Limpar", btnExport: "Exp", btnImport: "Imp", btnReset: "Reset", confirmReset: "Redefinir todos os dados?", promptImport: "Cole os dados exportados:", addRow: "+ Linha", copyAll: "Copiar tudo", loadInd: "-- Carregar Independente --", loadSeq: "-- Carregar Sequencial --", calcTitle: "Calculadora" }
+            en: { title: "Simple Sheet PRO", modeInd: "Independent", modeSeq: "Sequential", masterLabelName: "Name:", masterLabelStart: "Base Value", savePreset: "Save", finalTotal: "Final Total", copyMsg: "Copied!", btnClear: "Clear", btnExport: "Exp", btnImport: "Imp", btnReset: "Reset", confirmReset: "Reset all data?", promptImport: "Paste data:", addRow: "+ Row", copyAll: "Copy All", loadInd: "-- Load Ind --", loadSeq: "-- Load Seq --", calcTitle: "Calculator" },
+            ja: { title: "シンプルシート PRO", modeInd: "独立計算", modeSeq: "連続計算", masterLabelName: "計算名:", masterLabelStart: "元の数字", savePreset: "保存", finalTotal: "最終合計", copyMsg: "コピー完了", btnClear: "クリア", btnExport: "出力", btnImport: "読込", btnReset: "初期化", confirmReset: "全データを削除しますか？", promptImport: "データを貼り付けてください:", addRow: "+ 行追加", copyAll: "全コピー", loadInd: "-- 独立読込 --", loadSeq: "-- 連続読込 --", calcTitle: "電卓" },
+            zh: { title: "简单计算表 PRO", modeInd: "独立计算", modeSeq: "连续计算", masterLabelName: "名称:", masterLabelStart: "初始值", savePreset: "保存", finalTotal: "最终合计", copyMsg: "已复制", btnClear: "清除", btnExport: "导出", btnImport: "导入", btnReset: "重置", confirmReset: "重置所有数据？", promptImport: "粘贴数据:", addRow: "+ 添加行", copyAll: "复制全部", loadInd: "-- 独立 --", loadSeq: "-- 连续 --", calcTitle: "计算器" },
+            ko: { title: "심플 시트 PRO", modeInd: "독립 계산", modeSeq: "연속 계산", masterLabelName: "이름:", masterLabelStart: "기준 숫자", savePreset: "저장", finalTotal: "최종 합계", copyMsg: "복사됨", btnClear: "지우기", btnExport: "내보내기", btnImport: "가져오기", btnReset: "초기화", confirmReset: "모든 데이터를 초기화할까요?", promptImport: "데이터를 붙여넣으세요:", addRow: "+ 행 추가", copyAll: "전체 복사", loadInd: "-- 독립 --", loadSeq: "-- 연속 --", calcTitle: "계산기" },
+            es: { title: "Hoja Simple PRO", modeInd: "Independiente", modeSeq: "Secuencial", masterLabelName: "Nombre:", masterLabelStart: "Valor Base", savePreset: "Guardar", finalTotal: "Total Final", copyMsg: "¡Copiado!", btnClear: "Limpiar", btnExport: "Exp", btnImport: "Imp", btnReset: "Reset", confirmReset: "¿Reiniciar?", promptImport: "Pegue datos:", addRow: "+ Fila", copyAll: "Todo", loadInd: "-- Cargar --", loadSeq: "-- Cargar --", calcTitle: "Calculadora" },
+            fr: { title: "Feuille Simple PRO", modeInd: "Indépendant", modeSeq: "Séquentiel", masterLabelName: "Nom:", masterLabelStart: "Valeur de base", savePreset: "Sauver", finalTotal: "Total Final", copyMsg: "Copié !", btnClear: "Effacer", btnExport: "Exp", btnImport: "Imp", btnReset: "Reset", confirmReset: "Reset ?", promptImport: "Collez données:", addRow: "+ Ligne", copyAll: "Tout", loadInd: "-- Ind --", loadSeq: "-- Seq --", calcTitle: "Calculatrice" },
+            pt: { title: "Folha Simples PRO", modeInd: "Independente", modeSeq: "Sequencial", masterLabelName: "Nom:", masterLabelStart: "Valor Base", savePreset: "Salvar", finalTotal: "Total Final", copyMsg: "Copiado!", btnClear: "Limpar", btnExport: "Exp", btnImport: "Imp", btnReset: "Reset", confirmReset: "Reset?", promptImport: "Cole dados:", addRow: "+ Linha", copyAll: "Tudo", loadInd: "-- Ind --", loadSeq: "-- Seq --", calcTitle: "Calculadora" }
         };
 
         let currentLanguage = 'en';
@@ -242,7 +259,7 @@
                 <div class="operator-group"><div class="operator-control" onclick="changeOp('${id}','smart',1)">▲</div><div class="operator-display" id="smart-op-${id}">${s?s.operator:'+'}</div><div class="operator-control" onclick="changeOp('${id}','smart',-1)">▼</div></div>
                 <input type="number" class="multiplier-input" value="${s?s.multiplier:'0'}" oninput="updateDisplay()">
                 <div class="percent-toggle ${s&&s.isPercentActive?'active':''}" onclick="this.classList.toggle('active');updateDisplay()">%</div>
-                <div class="result-group"><div class="result-text" id="smart-res-${id}">0</div><button style="border:none;background:none;cursor:pointer;font-size:1.4em;" onclick="copyIdText('smart-res-${id}')">📋</button><button style="border:none;background:none;cursor:pointer;font-size:1.4em;" onclick="this.closest('.row').remove();updateDisplay()">🗑️</button></div>`;
+                <div class="result-group"><div class="result-text" id="smart-res-${id}">0</div><button class="action-btn" onclick="copyIdText('smart-res-${id}')">📋</button><button class="action-btn" onclick="this.closest('.row').remove();updateDisplay()">🗑️</button></div>`;
             document.getElementById('rows-container-smart').appendChild(div); updateDisplay();
         }
 
@@ -255,7 +272,7 @@
                 <div class="operator-group"><div class="operator-control" onclick="changeOp('${id}','simple',1)">▲</div><div class="operator-display" id="simple-op-${id}">${s?s.operator:'+'}</div><div class="operator-control" onclick="changeOp('${id}','simple',-1)">▼</div></div>
                 <input type="number" class="multiplier-input" value="${s?s.multiplier:'0'}" oninput="updateDisplay()">
                 <div class="percent-toggle ${s&&s.isPercentActive?'active':''}" onclick="this.classList.toggle('active');updateDisplay()">%</div>
-                <div class="result-group"><div class="result-text" id="simple-run-${id}">0</div><button style="border:none;background:none;cursor:pointer;font-size:1.4em;" onclick="copyIdText('simple-run-${id}')">📋</button><button style="border:none;background:none;cursor:pointer;font-size:1.4em;" onclick="this.closest('.row').remove();updateDisplay()">🗑️</button></div>`;
+                <div class="result-group"><div class="result-text" id="simple-run-${id}">0</div><button class="action-btn" onclick="copyIdText('simple-run-${id}')">📋</button><button class="action-btn" onclick="this.closest('.row').remove();updateDisplay()">🗑️</button></div>`;
             document.getElementById('rows-container-simple').appendChild(div); updateDisplay();
         }
 
