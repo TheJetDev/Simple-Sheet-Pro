@@ -1,11 +1,12 @@
-c// sw.js
-const CACHE_NAME = 'simple-calc-app-v19'; 
+// ★重要: index.htmlを更新したときは、ここの数字(v19 -> v20)を必ず変えてください。
+// そうしないと、古い画面が残り続けてしまいます。
+const CACHE_NAME = 'simple-calc-app-v20'; 
 
 const urlsToCache = [
   './',
   'index.html',
   'manifest.json',
-  'favicon-96x96.png', // 修正: ここを .ico から実際のファイル名に変更
+  'favicon-96x96.png',
   'apple-touch-icon.png',
   'web-app-manifest-192x192.png',
   'web-app-manifest-512x512.png'
