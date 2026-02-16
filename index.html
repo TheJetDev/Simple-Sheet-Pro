@@ -126,7 +126,9 @@
         <div class="pro-modal-content" style="max-width:350px;">
             <div class="pro-title" id="impTitle">Import Data</div>
             <div class="pro-desc" id="impDesc" style="text-align:center; margin-bottom:10px;">Paste data here:</div>
-            <textarea id="importText" class="text-area-import" placeholder='Paste code here...'></textarea>
+            
+            <textarea id="importText" class="text-area-import" placeholder='Paste code here...' autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+            
             <button class="pro-btn-buy" id="btnDoImport" onclick="executeImport()" style="background: #007bff;">Load Data</button>
             <button class="pro-btn-close" id="btnCloseImp" onclick="closeModal('importModal')">Close</button>
         </div>
@@ -587,26 +589,45 @@
             showMsg(languageMap[currentLanguage].msgExported); 
         }
 
-        // --- Import (自動抽出) ---
+        // --- ★最強版のImport（自動抽出・バックスラッシュ除去・ポップアップ調査機能付き） ---
         function executeImport() {
             let text = document.getElementById('importText').value.trim();
             if(!text) return;
-            
-            text = text.replace(/```json/g, "").replace(/```/g, "").trim();
 
-            const firstBrace = text.indexOf('{');
-            const lastBrace = text.lastIndexOf('}');
+            // 1. 全角文字を半角に強制変換（スマホ対策）
+            text = text.replace(/[｛｝［］]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))
+                       .replace(/[“”]/g, '"');
+
+            // 2. 「▼ DATA CODE ▼」という目印があれば、それ以降だけを切り出す
+            let searchArea = text;
+            const marker = "▼ DATA CODE ▼";
+            if (text.includes(marker)) {
+                searchArea = text.substring(text.indexOf(marker) + marker.length);
+            }
+
+            // 3. 切り出した範囲の中から { と } を探す
+            const firstBrace = searchArea.indexOf('{');
+            const lastBrace = searchArea.lastIndexOf('}');
+
             if (firstBrace !== -1 && lastBrace !== -1 && firstBrace < lastBrace) {
                 try {
-                    const potentialJson = text.substring(firstBrace, lastBrace + 1);
-                    const j = JSON.parse(potentialJson);
+                    let cleanJson = searchArea.substring(firstBrace, lastBrace + 1);
+                    
+                    // ★追加：Reddit等のコピー対策！勝手についたバックスラッシュ(\)を消し去る
+                    cleanJson = cleanJson.replace(/\\([\[\]{}])/g, '$1');
+                    
+                    const j = JSON.parse(cleanJson);
                     applyData(j);
                     showMsg(languageMap[currentLanguage].msgLoad);
                     closeModal('importModal');
                     return;
-                } catch(e) {}
+                } catch(e) {
+                    alert("【エラー調査用】\n原因: " + e.message + "\n\n▼実際に読み込んだ文字▼\n" + searchArea.substring(firstBrace, lastBrace + 1));
+                    console.error("JSON Parse Error:", e);
+                }
             }
 
+            // 4. それでもダメなら従来のテキスト解析
             if(tryParseText(text)){ 
                 showMsg(languageMap[currentLanguage].msgLoad);
                 closeModal('importModal');
