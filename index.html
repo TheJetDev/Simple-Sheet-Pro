@@ -689,7 +689,7 @@
             const el = document.getElementById('op-'+id);
             const currentOp = el.textContent.trim();
             el.textContent = ops[(ops.indexOf(currentOp) + d + 4) % 4]; 
-            updateDisplay(); // 計算を更新して、その中で自動保存されます
+            updateDisplay(); // updateDisplayの中でsaveSettingsも呼ばれるのでこれでOK
         }
     
 
@@ -767,5 +767,6 @@
     </script>
 </body>
 </html>
+
 
 
