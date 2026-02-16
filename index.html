@@ -589,53 +589,62 @@
             showMsg(languageMap[currentLanguage].msgExported); 
         }
 
-        // --- ★最強版のImport（自動抽出・バックスラッシュ除去・ポップアップ調査機能付き） ---
+        // --- Import (全環境対応・最終版) ---
         function executeImport() {
-            let text = document.getElementById('importText').value.trim();
-            if(!text) return;
+            let rawText = document.getElementById('importText').value;
+            if(!rawText) return;
+            
+            // 1. 基本的な浄化
+            let cleanText = rawText
+                .replace(/\u00A0/g, " ")
+                .replace(/\u200B/g, "")
+                .replace(/\u200E/g, "")
+                .replace(/[“”]/g, '"')
+                .replace(/```json/g, "")
+                .replace(/```/g, "")
+                .trim();
 
-            // 1. 全角文字を半角に強制変換（スマホ対策）
-            text = text.replace(/[｛｝［］]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))
-                       .replace(/[“”]/g, '"');
-
-            // 2. 「▼ DATA CODE ▼」という目印があれば、それ以降だけを切り出す
-            let searchArea = text;
             const marker = "▼ DATA CODE ▼";
-            if (text.includes(marker)) {
-                searchArea = text.substring(text.indexOf(marker) + marker.length);
+            if (cleanText.includes(marker)) {
+                cleanText = cleanText.split(marker)[1].trim();
             }
 
-            // 3. 切り出した範囲の中から { と } を探す
-            const firstBrace = searchArea.indexOf('{');
-            const lastBrace = searchArea.lastIndexOf('}');
-
+            // 2. JSON部分を特定して抽出
+            const firstBrace = cleanText.indexOf('{');
+            const lastBrace = cleanText.lastIndexOf('}');
+            
             if (firstBrace !== -1 && lastBrace !== -1 && firstBrace < lastBrace) {
+                let jsonPart = cleanText.substring(firstBrace, lastBrace + 1);
+                
+                // --- 【最強のURL分離 & ゴミ掃除ロジック】 ---
+                // ① 改行記号 \n を一旦逃がして保護
+                jsonPart = jsonPart.replace(/\\n/g, "§N§");
+                // ② Redditのゴミ \ だけを消す
+                jsonPart = jsonPart.replace(/\\([^n\\])/g, '$1');
+                // ③ JSONを壊す物理的な改行を消す
+                jsonPart = jsonPart.replace(/\n/g, "").replace(/\r/g, "");
+                // ④ 保護していた改行記号を戻す
+                jsonPart = jsonPart.replace(/§N§/g, "\\n");
+
                 try {
-                    let cleanJson = searchArea.substring(firstBrace, lastBrace + 1);
-                    
-                    // ★追加：Reddit等のコピー対策！勝手についたバックスラッシュ(\)を消し去る
-                    cleanJson = cleanJson.replace(/\\([\[\]{}])/g, '$1');
-                    
-                    const j = JSON.parse(cleanJson);
+                    const j = JSON.parse(jsonPart);
                     applyData(j);
                     showMsg(languageMap[currentLanguage].msgLoad);
                     closeModal('importModal');
                     return;
                 } catch(e) {
-                    alert("【エラー調査用】\n原因: " + e.message + "\n\n▼実際に読み込んだ文字▼\n" + searchArea.substring(firstBrace, lastBrace + 1));
                     console.error("JSON Parse Error:", e);
                 }
             }
 
-            // 4. それでもダメなら従来のテキスト解析
-            if(tryParseText(text)){ 
+            // 3. JSONがダメならテキスト解析へ挑戦
+            if(tryParseText(rawText)){ 
                 showMsg(languageMap[currentLanguage].msgLoad);
                 closeModal('importModal');
             } else {
                 showMsg(languageMap[currentLanguage].msgError);
             }
         }
-
         function addRow(s=null) {
             const id = s && s.id ? s.id : Math.random().toString(36).substr(2, 5);
             const ph = languageMap[currentLanguage].rowLabel;
@@ -751,3 +760,4 @@
     </script>
 </body>
 </html>
+
