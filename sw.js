@@ -1,6 +1,4 @@
-// ★重要: index.htmlを更新したときは、ここの数字(v19 -> v20)を必ず変えてください。
-// そうしないと、古い画面が残り続けてしまいます。
-const CACHE_NAME = 'simple-calc-app-v23'; 
+const CACHE_NAME = 'simple-calc-app-v24'; 
 
 const urlsToCache = [
   './',
@@ -29,4 +27,5 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   event.respondWith(caches.match(event.request).then(res => res || fetch(event.request)));
 });
+
 
