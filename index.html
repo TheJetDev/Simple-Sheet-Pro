@@ -265,16 +265,21 @@
                 langCont.appendChild(btn);
             });
 
-            let saved = localStorage.getItem('simpleSheetLang_pro');
-            if(!saved) {
+            let savedLang = localStorage.getItem('simpleSheetLang_pro');
+            if(!savedLang) {
                 const browserLang = navigator.language.slice(0, 2);
-                if(languageMap[browserLang]) saved = browserLang;
-                else saved = 'en';
+                savedLang = languageMap[browserLang] ? browserLang : 'en';
             }
-            setLanguage(saved); 
+            setLanguage(savedLang); 
             
-            const s = JSON.parse(localStorage.getItem('simpleSheetSettings_pro') || '{}');
-            applyData(s);
+            // --- ここで自動復元 ---
+            const savedData = localStorage.getItem('simpleSheetSettings_pro');
+            if (savedData) {
+                try {
+                    applyData(JSON.parse(savedData));
+                } catch(e) { console.error("Restore error", e); }
+            }
+            
             renderSaveList();
             updateMemoLinks();
         }
@@ -676,15 +681,17 @@
             `;
             document.getElementById('rows-container').appendChild(div); 
             updateDisplay();
+            saveSettings(); // ★追加：行を足した瞬間も保存
         }
 
         function changeOp(id, d) { 
             const ops = ['+','-','×','÷']; 
-            const el = document.getElementById('op-'+id).closest('.row').querySelector('.operator-display');
+            const el = document.getElementById('op-'+id);
             const currentOp = el.textContent.trim();
             el.textContent = ops[(ops.indexOf(currentOp) + d + 4) % 4]; 
-            updateDisplay(); 
+            updateDisplay(); // 計算を更新して、その中で自動保存されます
         }
+    
 
         function copyRowVal(btn) { 
             navigator.clipboard.writeText(btn.closest('.result-area').querySelector('.result-text').textContent.replace(/,/g,'')); 
@@ -760,4 +767,5 @@
     </script>
 </body>
 </html>
+
 
