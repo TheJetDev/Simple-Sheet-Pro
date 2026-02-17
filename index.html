@@ -254,6 +254,9 @@
         let currentLanguage = 'en'; 
         let isEditMode = false;
         let currentCalc = "0";
+        
+        // ★最強のバリア（画面の準備ができるまで保存をブロックする）
+        let isAppReady = false; 
 
         function init() {
             const langCont = document.getElementById('langContainer');
@@ -278,10 +281,15 @@
                 try {
                     applyData(JSON.parse(savedData));
                 } catch(e) { console.error("Restore error", e); }
+            } else {
+                addRow(); // 初めて開いた時だけ空の行を作る
             }
             
             renderSaveList();
             updateMemoLinks();
+            
+            // ★準備完了！ここから先だけ自動保存を許可する
+            isAppReady = true; 
         }
 
         function setLanguage(lang) {
@@ -380,19 +388,29 @@
             }
         }
 
+        // ★空欄が「0」に変わってしまうのを防ぐ
         function getScreenData() {
             return {
                 n: document.getElementById('masterLabel').value, 
                 b: document.getElementById('masterInput').value, 
                 m: document.getElementById('memoArea').value, 
-                r: Array.from(document.querySelectorAll('#rows-container .row')).map(r => ({
-                    n: r.querySelector('.text-label-input').value, 
-                    p: parseFloat(r.querySelector('.multiplier-input').value) || 0,
-                    o: r.querySelector('.operator-display').textContent.trim(), 
-                    pct: r.querySelector('.percent-toggle').classList.contains('active'), 
-                    c: r.querySelector('.base-toggle').classList.contains('chain') 
-                }))
+                r: Array.from(document.querySelectorAll('#rows-container .row')).map(r => {
+                    let rawVal = r.querySelector('.multiplier-input').value;
+                    return {
+                        n: r.querySelector('.text-label-input').value, 
+                        p: rawVal === "" ? "" : (parseFloat(rawVal) || 0), // 空欄は空欄のまま記憶する
+                        o: r.querySelector('.operator-display').textContent.trim(), 
+                        pct: r.querySelector('.percent-toggle').classList.contains('active'), 
+                        c: r.querySelector('.base-toggle').classList.contains('chain') 
+                    };
+                })
             };
+        }
+        
+        // ★セーブ機能にバリアを追加
+        function saveSettings() { 
+            if (!isAppReady) return; // 読み込み中は絶対に保存しない（上書き消去の防止）
+            localStorage.setItem('simpleSheetSettings_pro', JSON.stringify(getScreenData())); 
         }
 
         function applyData(s) {
@@ -775,6 +793,7 @@
     </script>
 </body>
 </html>
+
 
 
 
