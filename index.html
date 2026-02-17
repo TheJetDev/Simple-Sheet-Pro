@@ -266,25 +266,27 @@
                 langCont.appendChild(btn);
             });
 
-            let savedLang = localStorage.getItem('simpleSheetLang_pro');
-            if(!savedLang) {
-                const browserLang = navigator.language.slice(0, 2);
-                savedLang = languageMap[browserLang] ? browserLang : 'en';
-            }
-            setLanguage(savedLang); 
-            
-            // --- オートセーブの自動復元 ---
+            // ★変更点：先にデータを復元して、画面を作ってしまう！
             const savedData = localStorage.getItem('simpleSheetSettings_pro');
             if (savedData) {
                 try {
                     applyData(JSON.parse(savedData));
                 } catch(e) { 
                     console.error("Restore error", e); 
-                    addRow(); 
+                    addRow(); // エラー時は空の行を作る
                 }
             } else {
-                addRow(); // 初回アクセス時に空の行を作る
+                addRow(); // 初めて開いた時だけ空の行を作る
             }
+
+            // ★変更点：データが復元された「後」に、言語を設定する！
+            // （これなら、ここでオートセーブが走っても中身が詰まっているので消えません）
+            let savedLang = localStorage.getItem('simpleSheetLang_pro');
+            if(!savedLang) {
+                const browserLang = navigator.language.slice(0, 2);
+                savedLang = languageMap[browserLang] ? browserLang : 'en';
+            }
+            setLanguage(savedLang); 
             
             renderSaveList();
             updateMemoLinks();
@@ -774,6 +776,7 @@
     </script>
 </body>
 </html>
+
 
 
 
