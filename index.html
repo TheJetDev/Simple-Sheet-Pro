@@ -421,13 +421,9 @@
                     addRow(rowData);
                 }); 
             } else { 
-                // データが空の時（初期状態）だけ、新しい空の行を作る
+                // データがない場合のみ初期行を追加
                 addRow(); 
             }
-            
-            updateMemoLinks();
-            updateDisplay();
-        }
             
             updateMemoLinks();
             updateDisplay();
@@ -779,6 +775,7 @@
     </script>
 </body>
 </html>
+
 
 
 
