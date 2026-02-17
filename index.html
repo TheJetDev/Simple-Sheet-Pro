@@ -254,9 +254,7 @@
         let currentLanguage = 'en'; 
         let isEditMode = false;
         let currentCalc = "0";
-        
-        // ★最強のバリア（画面の準備ができるまで保存をブロックする）
-        let isAppReady = false; 
+        let isLoading = false; // ★【重要】読み込み中にセーブさせないためのバリア
 
         function init() {
             const langCont = document.getElementById('langContainer');
@@ -275,21 +273,21 @@
             }
             setLanguage(savedLang); 
             
-            // --- ここで自動復元 ---
+            // --- オートセーブの自動復元 ---
             const savedData = localStorage.getItem('simpleSheetSettings_pro');
             if (savedData) {
                 try {
                     applyData(JSON.parse(savedData));
-                } catch(e) { console.error("Restore error", e); }
+                } catch(e) { 
+                    console.error("Restore error", e); 
+                    addRow(); 
+                }
             } else {
-                addRow(); // 初めて開いた時だけ空の行を作る
+                addRow(); // 初回アクセス時に空の行を作る
             }
             
             renderSaveList();
             updateMemoLinks();
-            
-            // ★準備完了！ここから先だけ自動保存を許可する
-            isAppReady = true; 
         }
 
         function setLanguage(lang) {
@@ -299,7 +297,6 @@
             
             document.getElementById('title').textContent = d.title;
             document.getElementById('masterLabel').placeholder = d.masterLabelName;
-            
             document.getElementById('masterLabelStart').textContent = d.masterLabelStart;
             document.getElementById('btnClear').textContent = d.btnClear;
             document.getElementById('btnExport').textContent = d.btnExport;
@@ -366,7 +363,7 @@
                 r.querySelector('.result-text').textContent = formatNum(res);
                 chain = res;
             });
-            saveSettings();
+            saveSettings(); // 自動的にセーブが呼ばれる
         }
 
         // --- メモ帳のURLリンク機能 ---
@@ -388,7 +385,6 @@
             }
         }
 
-        // ★空欄が「0」に変わってしまうのを防ぐ
         function getScreenData() {
             return {
                 n: document.getElementById('masterLabel').value, 
@@ -398,7 +394,7 @@
                     let rawVal = r.querySelector('.multiplier-input').value;
                     return {
                         n: r.querySelector('.text-label-input').value, 
-                        p: rawVal === "" ? "" : (parseFloat(rawVal) || 0), // 空欄は空欄のまま記憶する
+                        p: rawVal === "" ? "" : parseFloat(rawVal), // 空欄を0にせず空欄のまま保持
                         o: r.querySelector('.operator-display').textContent.trim(), 
                         pct: r.querySelector('.percent-toggle').classList.contains('active'), 
                         c: r.querySelector('.base-toggle').classList.contains('chain') 
@@ -406,25 +402,18 @@
                 })
             };
         }
-        
-        // ★セーブ機能にバリアを追加
-        function saveSettings() { 
-            if (!isAppReady) return; // 読み込み中は絶対に保存しない（上書き消去の防止）
-            localStorage.setItem('simpleSheetSettings_pro', JSON.stringify(getScreenData())); 
-        }
 
         function applyData(s) {
             if(!s) return;
+            isLoading = true; // ★バリアON：復元中はセーブさせない
+
             document.getElementById('masterLabel').value = s.n || s.name || s.masterLabel || '';
             document.getElementById('masterInput').value = s.b || s.base || s.masterInput || '';
             document.getElementById('memoArea').value = s.m || s.memo || '';
             
-            // ★追加1：既存の行を一旦すべて削除して真っ新にする
-            document.getElementById('rows-container').innerHTML = '';
+            document.getElementById('rows-container').innerHTML = ''; // 画面を一度リセット
             
             let rowsToLoad = s.r || s.rows || s.simpleRows;
-            
-            // ★変更2：rowsToLoad が存在し、かつ中身がある場合だけループを回す
             if(rowsToLoad && rowsToLoad.length > 0) { 
                 rowsToLoad.forEach(r => {
                     let op = r.o || r.operator || '+';
@@ -439,15 +428,19 @@
                     addRow(rowData);
                 }); 
             } else { 
-                // データがない場合のみ初期行を追加
                 addRow(); 
             }
             
             updateMemoLinks();
-            updateDisplay();
+            
+            isLoading = false; // ★バリアOFF：復元完了
+            updateDisplay(); // 最後に1回だけ綺麗にセーブさせる
         }
 
-        function saveSettings(){ localStorage.setItem('simpleSheetSettings_pro', JSON.stringify(getScreenData())); }
+        function saveSettings(){ 
+            if (isLoading) return; // ★バリア中はセーブを弾く
+            localStorage.setItem('simpleSheetSettings_pro', JSON.stringify(getScreenData())); 
+        }
 
         function toggleEditMode() {
             isEditMode = !isEditMode;
@@ -548,7 +541,6 @@
             
             // HTML Format
             let h = `<table>`;
-            // タイトル: 中央寄せ・背景グレー・太字なし
             h += `<tr><td colspan="3" style="background-color:#EFEFEF; text-align:center; font-size:14pt;">【${escapeHtml(title)}】</td></tr>`;
             h += `<tr><td>${escapeHtml(baseLabel)}</td><td></td><td>${escapeHtml(baseVal)}</td></tr>`;
 
@@ -563,7 +555,6 @@
             const memo = document.getElementById('memoArea').value;
             if(memo) {
                 t += `\n[Memo]\n${escapeForExcel(memo)}`;
-                // メモ: 薄い黄色背景・自動改行挿入・折り返しスタイル
                 const htmlMemo = insertAutoBreaks(memo);
                 h += `<tr><td colspan="3" style="background-color:#FFF2CC; vertical-align:top; white-space:normal; word-wrap:break-word;"><b>[ Memo ]</b><br>${htmlMemo}</td></tr>`;
 
@@ -590,7 +581,6 @@
                 await navigator.clipboard.write([item]);
                 showMsg(languageMap[currentLanguage].copyMsg);
             } catch (err) {
-                // Fallback
                 navigator.clipboard.writeText(t);
                 showMsg(languageMap[currentLanguage].copyMsg + " (Text)");
             }
@@ -625,7 +615,6 @@
             let rawText = document.getElementById('importText').value;
             if(!rawText) return;
             
-            // 1. 基本的な浄化
             let cleanText = rawText
                 .replace(/\u00A0/g, " ")
                 .replace(/\u200B/g, "")
@@ -640,21 +629,15 @@
                 cleanText = cleanText.split(marker)[1].trim();
             }
 
-            // 2. JSON部分を特定して抽出
             const firstBrace = cleanText.indexOf('{');
             const lastBrace = cleanText.lastIndexOf('}');
             
             if (firstBrace !== -1 && lastBrace !== -1 && firstBrace < lastBrace) {
                 let jsonPart = cleanText.substring(firstBrace, lastBrace + 1);
                 
-                // --- 【最強のURL分離 & ゴミ掃除ロジック】 ---
-                // ① 改行記号 \n を一旦逃がして保護
                 jsonPart = jsonPart.replace(/\\n/g, "§N§");
-                // ② Redditのゴミ \ だけを消す
                 jsonPart = jsonPart.replace(/\\([^n\\])/g, '$1');
-                // ③ JSONを壊す物理的な改行を消す
                 jsonPart = jsonPart.replace(/\n/g, "").replace(/\r/g, "");
-                // ④ 保護していた改行記号を戻す
                 jsonPart = jsonPart.replace(/§N§/g, "\\n");
 
                 try {
@@ -668,7 +651,6 @@
                 }
             }
 
-            // 3. JSONがダメならテキスト解析へ挑戦
             if(tryParseText(rawText)){ 
                 showMsg(languageMap[currentLanguage].msgLoad);
                 closeModal('importModal');
@@ -676,6 +658,7 @@
                 showMsg(languageMap[currentLanguage].msgError);
             }
         }
+
         function addRow(s=null) {
             const id = s && s.id ? s.id : Math.random().toString(36).substr(2, 5);
             const ph = languageMap[currentLanguage].rowLabel;
@@ -706,8 +689,7 @@
                 </div>
             `;
             document.getElementById('rows-container').appendChild(div); 
-            updateDisplay();
-            saveSettings(); // ★追加：行を足した瞬間も保存
+            updateDisplay(); // ここでsaveSettingsも呼ばれる
         }
 
         function changeOp(id, d) { 
@@ -715,9 +697,8 @@
             const el = document.getElementById('op-'+id);
             const currentOp = el.textContent.trim();
             el.textContent = ops[(ops.indexOf(currentOp) + d + 4) % 4]; 
-            updateDisplay(); // updateDisplayの中でsaveSettingsも呼ばれるのでこれでOK
+            updateDisplay(); 
         }
-    
 
         function copyRowVal(btn) { 
             navigator.clipboard.writeText(btn.closest('.result-area').querySelector('.result-text').textContent.replace(/,/g,'')); 
@@ -793,6 +774,7 @@
     </script>
 </body>
 </html>
+
 
 
 
