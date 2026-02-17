@@ -400,11 +400,14 @@
             document.getElementById('masterLabel').value = s.n || s.name || s.masterLabel || '';
             document.getElementById('masterInput').value = s.b || s.base || s.masterInput || '';
             document.getElementById('memoArea').value = s.m || s.memo || '';
-            updateMemoLinks();
+            
+            // ★追加1：既存の行を一旦すべて削除して真っ新にする
             document.getElementById('rows-container').innerHTML = '';
             
             let rowsToLoad = s.r || s.rows || s.simpleRows;
-            if(rowsToLoad) { 
+            
+            // ★変更2：rowsToLoad が存在し、かつ中身がある場合だけループを回す
+            if(rowsToLoad && rowsToLoad.length > 0) { 
                 rowsToLoad.forEach(r => {
                     let op = r.o || r.operator || '+';
                     let label = r.n || r.label || '';
@@ -417,7 +420,16 @@
                     };
                     addRow(rowData);
                 }); 
-            } else { addRow(); }
+            } else { 
+                // データが空の時（初期状態）だけ、新しい空の行を作る
+                addRow(); 
+            }
+            
+            updateMemoLinks();
+            updateDisplay();
+        }
+            
+            updateMemoLinks();
             updateDisplay();
         }
 
@@ -767,6 +779,7 @@
     </script>
 </body>
 </html>
+
 
 
 
