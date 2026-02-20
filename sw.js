@@ -1,4 +1,4 @@
-const CACHE_NAME = 'simple-calc-app-v2.2.3'; 
+const CACHE_NAME = 'simple-calc-app-v2.2.4'; 
 
 const urlsToCache = [
   './',
@@ -27,6 +27,7 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   event.respondWith(caches.match(event.request).then(res => res || fetch(event.request)));
 });
+
 
 
 
