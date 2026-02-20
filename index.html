@@ -416,7 +416,12 @@
 
             document.getElementById('masterLabel').value = s.n || s.name || s.masterLabel || '';
             document.getElementById('masterInput').value = s.b || s.base || s.masterInput || '';
-            document.getElementById('memoArea').value = s.m || s.memo || '';
+            
+            let memoText = s.m || s.memo || '';
+            // スマホ版Redditのコピペバグ等でURLがくっついてしまった場合、強制的に改行を挟んで分離する
+            memoText = memoText.replace(/([^\s])(https?:\/\/)/gi, '$1\n$2');
+            document.getElementById('memoArea').value = memoText;
+            // ▲▲▲ ここまで変更 ▲▲▲
             
             document.getElementById('rows-container').innerHTML = ''; 
             
@@ -789,3 +794,4 @@
     </script>
 </body>
 </html>
+
