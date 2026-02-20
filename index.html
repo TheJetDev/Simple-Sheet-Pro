@@ -16,6 +16,7 @@
         
         /* メモ帳エリア */
         .memo-container { flex: 1; min-width: 250px; background-color: #fff; padding: 12px; border-radius: 10px; box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1); height: 85vh; position: sticky; top: 8px; display: flex; flex-direction: column; }
+        /* 背景色を薄い黄色に変更 */
         .memo-area { flex: 1; width: 100%; resize: none; border: 1px solid #ccc; border-radius: 8px; padding: 10px; font-size: 0.95em; line-height: 1.5; outline: none; background: #FFF2CC; color: #333; margin-bottom: 10px; }
         .memo-links { max-height: 150px; overflow-y: auto; padding: 5px; background: #f9f9f9; border-radius: 6px; border: 1px dashed #ccc; }
         .memo-link-item { display: block; padding: 6px; margin-bottom: 4px; background: #e3f2fd; color: #0d47a1; text-decoration: none; border-radius: 4px; font-size: 0.9em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -28,8 +29,6 @@
         .side-calc { flex: 1; min-width: 260px; background: #333; padding: 12px; border-radius: 10px; color: white; height: fit-content; position: sticky; top: 8px; }
 
         .row { display: flex; margin-bottom: 12px; padding: 12px; border: 1px solid #ccc; border-radius: 10px; background-color: #fff; gap: 8px; }
-        
-        /* PC用レイアウト */
         @media screen and (min-width: 1001px) {
             .row { flex-direction: row; align-items: center; justify-content: space-between; }
             .text-label-input { flex: 1.5; }
@@ -37,47 +36,22 @@
             .result-area { flex: 2; justify-content: flex-end; background: #f8f9fa; padding: 5px 10px; border-radius: 6px; }
             .result-text { font-size: 1.6em; }
         }
-
-        /* ★スマホ用レイアウト（PRO版向けに最適化）★ */
         @media screen and (max-width: 1000px) {
             body { padding-top: calc(env(safe-area-inset-top) + 10px) !important; padding-left: 8px; padding-right: 8px; }
             .app-grid { flex-direction: column; }
             .memo-container { width: 100%; height: auto; min-height: 200px; position: static; margin-bottom: 12px; }
             .sheet-container { width: 100%; }
-            
-            /* 上部コントロールを縦並びに */
-            .top-controls { flex-direction: column !important; align-items: stretch !important; gap: 8px; }
-            .top-controls > div { width: 100% !important; justify-content: center; }
-            
-            /* PRO版特有：マスター行（元の数字）をスマホで綺麗に */
-            .master-row { flex-direction: column !important; align-items: stretch !important; gap: 10px; }
-            .master-input { width: 100% !important; }
-            
-            /* ユーティリティボタンを画面幅に合わせて最適化 */
-            .utility-bar { justify-content: space-between; gap: 6px; }
-            .util-btn { flex: 1; min-width: calc(25% - 6px); padding: 8px 4px; }
-            .util-btn.manual { width: 100%; flex: none; margin-bottom: 4px; }
-
+            .top-controls { flex-wrap: wrap; }
             .row { flex-direction: column !important; align-items: stretch !important; }
             .text-label-input { width: 100% !important; font-size: 1.1em; padding: 10px; margin-bottom: 5px; }
-            
-            /* 計算エリアがはみ出さないように、数値をフレキシブルに */
-            .calc-area { width: 100% !important; flex-wrap: nowrap !important; justify-content: space-between !important; padding: 10px 0; border-top: 1px dashed #eee; border-bottom: 1px dashed #eee; }
-            .multiplier-input { flex: 1; width: 100%; min-width: 0; margin: 0 5px; }
-            
-            .result-area { width: 100% !important; justify-content: space-between !important; background: #eefbff; padding: 12px; border-radius: 8px; margin-top: 5px; }
+            .calc-area { width: 100% !important; justify-content: center !important; padding: 10px 0; border-top: 1px dashed #eee; border-bottom: 1px dashed #eee; }
+            .result-area { width: 100% !important; justify-content: space-between !important; background: #eefbff; padding: 12px; border-radius: 8px; }
             .result-text { font-size: 2.2em; word-break: break-all; }
-            
-            /* 電卓ポップアップのスマホ対応 */
-            .side-calc { display: none; position: fixed; bottom: 80px; right: 15px; z-index: 1000; width: calc(100vw - 30px); max-width: 320px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+            .side-calc { display: none; position: fixed; bottom: 80px; right: 15px; z-index: 1000; width: 280px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
             .side-calc.active { display: block; }
             .calc-toggle-btn { display: block; }
             .mobile-calc-close { display: block; }
-            
-            /* モーダル（説明書・インポート）が画面からはみ出さないように */
-            .pro-modal-content { width: 95%; max-height: 90vh; overflow-y: auto; padding: 15px; }
         }
-
         /* パーツ類 */
         .text-label-input { padding: 8px; border: 2px solid #000; border-radius: 6px; font-weight: bold; color: #000; outline: none; }
         .calc-area { display: flex; align-items: center; gap: 8px; }
@@ -263,7 +237,7 @@
                   manual: "📖 説明書", btnClose: "閉じる", msgSave: "保存しました", msgLoad: "読み込みました", confirmDel: "削除しますか？", msgExported: "データコードをコピーしました", msgError: "エラー", impTitle:"データの読込", impDesc:"ここにデータを貼り付け:", btnLoad:"読込開始", memoTitle: "📝 メモ" },
             zh: { title: "Simple Sheet PRO", masterLabelName: "标题", masterLabelStart: "🏠 初始值", rowLabel: "项目名称", copyMsg: "已复制", btnClear: "清除", btnExport: "导出", btnImport: "导入", btnReset: "重置", confirmReset: "确认重置所有数据？", addRow: "+ 添加行", copyAll: "📋 复制", calcTitle: "计算器", btnSave: "💾 保存", btnDone: "完成",
                   manual: "📖 说明书", btnClose: "关闭", msgSave: "已保存", msgLoad: "已加载", confirmDel: "删除？", msgExported: "代码已复制", msgError: "错误", impTitle:"导入数据", impDesc:"粘贴代码:", btnLoad:"加载", memoTitle: "📝 备忘录" },
-            ko: { title: "Simple Sheet PRO", masterLabelName: "제목", masterLabelStart: "🏠 기준값", rowLabel: "항목 이름", copyMsg: "복사됨", btnClear: "지우기", btnExport: "내보내기", btnImport: "가져오기", btnReset: "초기화", confirmReset: "전체 초기화하시겠습니까?", addRow: "+ 행 추가", copyAll: "📋 복사", calcTitle: "계산기", btnSave: "💾 저장", btnDone: "완료",
+            ko: { title: "Simple Sheet PRO", masterLabelName: "제목", masterLabelStart: "🏠 기준값", rowLabel: "항목 이름", copyMsg: "복사됨", btnClear: "지우기", btnExport: "내보내기", btnImport: "가져오기", btnReset: "초기화", confirmReset: "전체 초기화하시겠습니까?", addRow: "+ 행 추가", copyAll: "📋 복사", calcTitle: "계산기", btnSave: "💾 저장", 단Done: "완료",
                   manual: "📖 설명서", btnClose: "닫기", msgSave: "저장됨", msgLoad: "로드됨", confirmDel: "삭제?", msgExported: "코드 복사됨", msgError: "오류", impTitle:"데이터 가져오기", impDesc:"코드 붙여넣기:", btnLoad:"로드", memoTitle: "📝 메모" },
             es: { title: "Simple Sheet PRO", masterLabelName: "Título", masterLabelStart: "🏠 Valor Base", rowLabel: "Nombre del ítem", copyMsg: "¡Copiado!", btnClear: "Borrar", btnExport: "Exp", btnImport: "Imp", btnReset: "Reiniciar", confirmReset: "¿Reiniciar todo?", addRow: "+ Fila", copyAll: "📋 Copiar", calcTitle: "Calculadora", btnSave: "💾 Guardar", btnDone: "Listo",
                   manual: "📖 Manual", btnClose: "Cerrar", msgSave: "¡Guardado!", msgLoad: "¡Cargado!", confirmDel: "¿Eliminar?", msgExported: "¡Código copiado!", msgError: "Error", impTitle:"Importar", impDesc:"Pegar código:", btnLoad:"Cargar", memoTitle: "📝 Nota" },
@@ -280,7 +254,7 @@
         let currentLanguage = 'en'; 
         let isEditMode = false;
         let currentCalc = "0";
-        let isLoading = false; // ★【重要】読み込み中にセーブさせないためのバリア
+        let isLoading = false;
 
         function init() {
             const langCont = document.getElementById('langContainer');
@@ -292,25 +266,29 @@
                 langCont.appendChild(btn);
             });
 
-            // ★変更点：先にデータを復元して、画面を作ってしまう！
-            const savedData = localStorage.getItem('simpleSheetSettings_pro');
-            if (savedData) {
+            // ★無料版と同じ、データが空っぽでも壊れない復元ロジック
+            const savedDataStr = localStorage.getItem('simpleSheetSettings_pro');
+            if (savedDataStr) {
                 try {
-                    applyData(JSON.parse(savedData));
+                    const parsed = JSON.parse(savedDataStr);
+                    if (Object.keys(parsed).length === 0) {
+                        addRow();
+                    } else {
+                        applyData(parsed);
+                    }
                 } catch(e) { 
                     console.error("Restore error", e); 
-                    addRow(); // エラー時は空の行を作る
+                    addRow();
                 }
             } else {
-                addRow(); // 初めて開いた時だけ空の行を作る
+                addRow(); 
             }
 
-            // ★変更点：データが復元された「後」に、言語を設定する！
-            // （これなら、ここでオートセーブが走っても中身が詰まっているので消えません）
             let savedLang = localStorage.getItem('simpleSheetLang_pro');
             if(!savedLang) {
-                const browserLang = navigator.language.slice(0, 2);
-                savedLang = languageMap[browserLang] ? browserLang : 'en';
+                const browserLang = (navigator.language || 'en').slice(0, 2);
+                if(languageMap[browserLang]) savedLang = browserLang;
+                else savedLang = 'en';
             }
             setLanguage(savedLang); 
             
@@ -391,10 +369,9 @@
                 r.querySelector('.result-text').textContent = formatNum(res);
                 chain = res;
             });
-            saveSettings(); // 自動的にセーブが呼ばれる
+            saveSettings(); 
         }
 
-        // --- メモ帳のURLリンク機能 ---
         function updateMemoLinks() {
             const text = document.getElementById('memoArea').value;
             const linkDiv = document.getElementById('memoLinks');
@@ -413,6 +390,7 @@
             }
         }
 
+        // ★無料版と同じ、空欄を0にせずそのまま記憶するロジック
         function getScreenData() {
             return {
                 n: document.getElementById('masterLabel').value, 
@@ -422,7 +400,7 @@
                     let rawVal = r.querySelector('.multiplier-input').value;
                     return {
                         n: r.querySelector('.text-label-input').value, 
-                        p: rawVal === "" ? "" : parseFloat(rawVal), // 空欄を0にせず空欄のまま保持
+                        p: rawVal === "" ? "" : (parseFloat(rawVal) || 0), 
                         o: r.querySelector('.operator-display').textContent.trim(), 
                         pct: r.querySelector('.percent-toggle').classList.contains('active'), 
                         c: r.querySelector('.base-toggle').classList.contains('chain') 
@@ -431,18 +409,19 @@
             };
         }
 
+        // ★無料版と同じ、重複を防止するロジック
         function applyData(s) {
             if(!s) return;
-            isLoading = true; // ★バリアON：復元中はセーブさせない
+            isLoading = true; 
 
             document.getElementById('masterLabel').value = s.n || s.name || s.masterLabel || '';
             document.getElementById('masterInput').value = s.b || s.base || s.masterInput || '';
             document.getElementById('memoArea').value = s.m || s.memo || '';
             
-            document.getElementById('rows-container').innerHTML = ''; // 画面を一度リセット
+            document.getElementById('rows-container').innerHTML = ''; 
             
             let rowsToLoad = s.r || s.rows || s.simpleRows;
-            if(rowsToLoad && rowsToLoad.length > 0) { 
+            if(Array.isArray(rowsToLoad) && rowsToLoad.length > 0) { 
                 rowsToLoad.forEach(r => {
                     let op = r.o || r.operator || '+';
                     let label = r.n || r.label || '';
@@ -461,12 +440,12 @@
             
             updateMemoLinks();
             
-            isLoading = false; // ★バリアOFF：復元完了
-            updateDisplay(); // 最後に1回だけ綺麗にセーブさせる
+            isLoading = false; 
+            updateDisplay(); 
         }
 
         function saveSettings(){ 
-            if (isLoading) return; // ★バリア中はセーブを弾く
+            if (isLoading) return; 
             localStorage.setItem('simpleSheetSettings_pro', JSON.stringify(getScreenData())); 
         }
 
@@ -557,17 +536,14 @@
             return res;
         }
 
-        // --- Copy Logic (HTML + Text) ---
         async function copyPage() { 
             const title = document.getElementById('masterLabel').value || 'Sheet';
             const baseLabel = languageMap[currentLanguage].masterLabelStart;
             const baseVal = document.getElementById('masterInput').value;
             
-            // Text Format
             let t = `【${escapeForExcel(title)}】\n`;
             t += `${baseLabel}\t\t${baseVal}\n`;
             
-            // HTML Format
             let h = `<table>`;
             h += `<tr><td colspan="3" style="background-color:#EFEFEF; text-align:center; font-size:14pt;">【${escapeHtml(title)}】</td></tr>`;
             h += `<tr><td>${escapeHtml(baseLabel)}</td><td></td><td>${escapeHtml(baseVal)}</td></tr>`;
@@ -638,51 +614,57 @@
             showMsg(languageMap[currentLanguage].msgExported); 
         }
 
-        // --- Import (全環境対応・最終版) ---
+        // ★無料版と同じ、強力な復旧機能を持ったインポート
         function executeImport() {
             let rawText = document.getElementById('importText').value;
             if(!rawText) return;
             
-            let cleanText = rawText
-                .replace(/\u00A0/g, " ")
-                .replace(/\u200B/g, "")
-                .replace(/\u200E/g, "")
-                .replace(/[“”]/g, '"')
-                .replace(/```json/g, "")
-                .replace(/```/g, "")
-                .trim();
+            try {
+                let cleanText = rawText
+                    .replace(/\u00A0/g, " ")
+                    .replace(/[\u200B\u200E\uFEFF\u202A-\u202E]/g, "")
+                    .replace(/[“”]/g, '"')
+                    .replace(/```json/gi, "")
+                    .replace(/```/g, "")
+                    .trim();
 
-            const marker = "▼ DATA CODE ▼";
-            if (cleanText.includes(marker)) {
-                cleanText = cleanText.split(marker)[1].trim();
-            }
+                const marker = "▼ DATA CODE ▼";
+                if (cleanText.includes(marker)) {
+                    cleanText = cleanText.split(marker)[1].trim();
+                }
 
-            const firstBrace = cleanText.indexOf('{');
-            const lastBrace = cleanText.lastIndexOf('}');
-            
-            if (firstBrace !== -1 && lastBrace !== -1 && firstBrace < lastBrace) {
-                let jsonPart = cleanText.substring(firstBrace, lastBrace + 1);
-                
-                jsonPart = jsonPart.replace(/\\n/g, "§N§");
-                jsonPart = jsonPart.replace(/\\([^n\\])/g, '$1');
-                jsonPart = jsonPart.replace(/\n/g, "").replace(/\r/g, "");
-                jsonPart = jsonPart.replace(/§N§/g, "\\n");
+                const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    let jsonPart = jsonMatch[0];
+                    
+                    jsonPart = jsonPart.replace(/\\\[/g, "[").replace(/\\\]/g, "]");
+                    jsonPart = jsonPart.replace(/\\n/g, "§N§");
+                    jsonPart = jsonPart.replace(/\r?\n/g, " ");
+                    jsonPart = jsonPart.replace(/§N§/g, "\\n");
 
-                try {
-                    const j = JSON.parse(jsonPart);
-                    applyData(j);
+                    const tryParse = (str) => {
+                        try { return JSON.parse(str); } catch(e) { return null; }
+                    };
+                    
+                    let j = tryParse(jsonPart) || tryParse(jsonPart + '}') || tryParse(jsonPart + ']}') || tryParse(jsonPart + '}]}');
+                    
+                    if (j) {
+                        applyData(j);
+                        showMsg(languageMap[currentLanguage].msgLoad);
+                        closeModal('importModal');
+                        return; 
+                    }
+                }
+
+                if(tryParseText(rawText)){ 
                     showMsg(languageMap[currentLanguage].msgLoad);
                     closeModal('importModal');
-                    return;
-                } catch(e) {
-                    console.error("JSON Parse Error:", e);
+                } else {
+                    showMsg(languageMap[currentLanguage].msgError); 
                 }
-            }
 
-            if(tryParseText(rawText)){ 
-                showMsg(languageMap[currentLanguage].msgLoad);
-                closeModal('importModal');
-            } else {
+            } catch(err) {
+                console.error("IMPORT ERROR:", err);
                 showMsg(languageMap[currentLanguage].msgError);
             }
         }
@@ -717,7 +699,7 @@
                 </div>
             `;
             document.getElementById('rows-container').appendChild(div); 
-            updateDisplay(); // ここでsaveSettingsも呼ばれる
+            updateDisplay(); 
         }
 
         function changeOp(id, d) { 
@@ -733,8 +715,13 @@
             showMsg(languageMap[currentLanguage].copyMsg); 
         }
 
+        // ★無料版と同じ、テキスト解析ロジック
         function tryParseText(text) {
-             const lines = text.trim().split(/\r?\n/);
+             const purifiedText = text
+                .replace(/\u00A0/g, " ")
+                .replace(/[\u200B\u200E\uFEFF\u202A-\u202E]/g, "");
+
+            const lines = purifiedText.trim().split(/\r?\n/);
             if (lines.length < 1) return false;
             let name = ""; let base = 0; let rows = []; let startRowIdx = 0;
             const titleMatch = lines[0].match(/【(.*?)】/);
