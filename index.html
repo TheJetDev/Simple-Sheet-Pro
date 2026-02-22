@@ -599,6 +599,11 @@
             const data = getScreenData();
             const jsonCode = JSON.stringify(data);
             
+            // --- SS1形式に圧縮 ---
+            const compressed = LZString.compressToBase64(jsonCode);
+            const ss1Code = "SS1:" + compressed;
+            // -------------------
+
             let output = "";
             const title = data.n || "Simple Sheet";
             output += `【 ${title} 】\n\n`;
@@ -612,8 +617,9 @@
                 output += "\n";
             }
             
-            output += "▼ DATA CODE ▼\n";
-            output += jsonCode;
+            // ▼ 生のJSONの代わりにSS1コードを出力するように変更
+            output += "▼ アプリで読み込む ▼\n";
+            output += ss1Code;
             
             navigator.clipboard.writeText(output); 
             showMsg(languageMap[currentLanguage].msgExported); 
@@ -625,6 +631,16 @@
             if(!rawText) return;
             
             try {
+                if (rawText.startsWith("SS1:")) {
+                    const compressed = rawText.substring(4); // "SS1:" を削る
+                    const decompressed = LZString.decompressFromBase64(compressed);
+                    if (decompressed) {
+                        applyData(JSON.parse(decompressed));
+                        showMsg(languageMap[currentLanguage].msgLoad);
+                        closeModal('importModal');
+                        return; // 成功したらここで終了
+                    }
+                }
                 let cleanText = rawText
                     .replace(/\u00A0/g, " ")
                     .replace(/[\u200B\u200E\uFEFF\u202A-\u202E]/g, "")
@@ -794,4 +810,5 @@
     </script>
 </body>
 </html>
+
 
