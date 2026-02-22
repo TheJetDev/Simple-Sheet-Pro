@@ -618,7 +618,7 @@
             }
             
             // ▼ 生のJSONの代わりにSS1コードを出力するように変更
-            output += "▼ アプリで読み込む ▼\n";
+            output += "▼ SS1 CODE ▼\n";
             output += ss1Code;
             
             navigator.clipboard.writeText(output); 
@@ -631,8 +631,9 @@
             if(!rawText) return;
             
             try {
-                if (rawText.startsWith("SS1:")) {
-                    const compressed = rawText.substring(4); // "SS1:" を削る
+                const ss1Match = rawText.match(/SS1:[\w\-_]+/);
+                if (ss1Match) {
+                    const compressed = ss1Match[0].substring(4); // "SS1:" を削る
                     const decompressed = LZString.decompressFromBase64(compressed);
                     if (decompressed) {
                         applyData(JSON.parse(decompressed));
@@ -810,5 +811,6 @@
     </script>
 </body>
 </html>
+
 
 
