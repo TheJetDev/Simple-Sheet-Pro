@@ -650,9 +650,12 @@
                     .replace(/```/g, "")
                     .trim();
 
-                const marker = "▼ DATA CODE ▼";
-                if (cleanText.includes(marker)) {
-                    cleanText = cleanText.split(marker)[1].trim();
+                const markerNew = "▼ SS1 CODE ▼";
+                const markerOld = "▼ DATA CODE ▼";
+                if (cleanText.includes(markerNew)) {
+                    cleanText = cleanText.split(markerNew)[1].trim();
+                } else if (cleanText.includes(markerOld)) {
+                    cleanText = cleanText.split(markerOld)[1].trim();
                 }
 
                 const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
@@ -811,6 +814,7 @@
     </script>
 </body>
 </html>
+
 
 
 
