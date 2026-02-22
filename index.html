@@ -631,7 +631,7 @@
             if(!rawText) return;
             
             try {
-                const ss1Match = rawText.match(/SS1:[\w\-_]+/);
+                const ss1Match = rawText.match(/SS1:[A-Za-z0-9+/=]+/);
                 if (ss1Match) {
                     const compressed = ss1Match[0].substring(4); // "SS1:" を削る
                     const decompressed = LZString.decompressFromBase64(compressed);
@@ -814,6 +814,7 @@
     </script>
 </body>
 </html>
+
 
 
 
