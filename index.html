@@ -257,7 +257,7 @@
         let currentCalc = "0";
         let isLoading = false;
 
-        function init() {
+    　　function init() {
             const langCont = document.getElementById('langContainer');
             Object.keys(languageMap).forEach(lang => {
                 const btn = document.createElement('button');
@@ -267,24 +267,46 @@
                 langCont.appendChild(btn);
             });
 
-            // ★無料版と同じ、データが空っぽでも壊れない復元ロジック
-            const savedDataStr = localStorage.getItem('simpleSheetSettings_pro');
-            if (savedDataStr) {
+            // ▼ 追加：URLにデータ（SS1v1）が含まれているかチェック！ ▼
+            const params = new URLSearchParams(window.location.search);
+            const urlData = params.get('data');
+
+            if (urlData && urlData.startsWith('SS1v1:')) {
+                // URLから飛んできた場合：URLのデータを解凍して表示する
                 try {
-                    const parsed = JSON.parse(savedDataStr);
-                    if (Object.keys(parsed).length === 0) {
-                        addRow();
-                    } else {
-                        applyData(parsed);
+                    const compressed = urlData.substring(6); // "SS1v1:" を削る
+                    const decompressed = LZString.decompressFromBase64(compressed);
+                    if (decompressed) {
+                        applyData(JSON.parse(decompressed));
+                        // ★超重要：読み込み成功後、URLからパラメータを消してスッキリさせる（リロード時の重複防止）
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        isLoading = false;
                     }
-                } catch(e) { 
-                    console.error("Restore error", e); 
+                } catch(e) {
+                    console.error("URL Load Error", e);
                     addRow();
                 }
             } else {
-                addRow(); 
-            }
+                // ▼ URLがない場合はここから下の既存ロジック（ローカルの復元）を実行 ▼
+                const savedDataStr = localStorage.getItem('simpleSheetSettings_pro');
+                if (savedDataStr) {
+                    try {
+                        const parsed = JSON.parse(savedDataStr);
+                        if (Object.keys(parsed).length === 0) {
+                            addRow();
+                        } else {
+                            applyData(parsed);
+                        }
+                    } catch(e) { 
+                        console.error("Restore error", e); 
+                        addRow();
+                    }
+                } else {
+                    addRow(); 
+                }
+            } // ★忘れずに else を閉じる
 
+            // ▼ ここから下は既存の言語読み込み処理など（そのまま）
             let savedLang = localStorage.getItem('simpleSheetLang_pro');
             if(!savedLang) {
                 const browserLang = (navigator.language || 'en').slice(0, 2);
@@ -612,44 +634,48 @@
         }
 
         function exportData() { 
-            const data = getScreenData();
-            const jsonCode = JSON.stringify(data);
-            
-            // --- SS1形式に圧縮 ---
-            const compressed = LZString.compressToBase64(jsonCode);
-            const ss1Code = "SS1:" + compressed;
-            // -------------------
+    const data = getScreenData();
+    const jsonCode = JSON.stringify(data);
+    
+    // --- SS1v1形式に圧縮 ---
+    const compressed = LZString.compressToBase64(jsonCode);
+    const ss1Code = "SS1v1:" + compressed; // ★v1を明記
+    
+    // ★追加：統合URLの生成（これを押せば全環境で開く）
+    // Pro版・ノーマル版ともに、出力するURLはノーマル版へ向ける
+const shareUrl = "https://thejetdev.github.io/Simple-Sheet/?data=" + encodeURIComponent(ss1Code);
+    // -------------------
 
-            let output = "";
-            const title = data.n || "Simple Sheet";
-            output += `【 ${title} 】\n\n`;
-            
-            const memo = data.m || "";
-            const urlRegex = /(https?:\/\/[^\s]+)/g;
-            const matches = memo.match(urlRegex);
-            if(matches && matches.length > 0) {
-                output += "[Links]\n";
-                matches.forEach(url => { output += `${url}\n`; });
-                output += "\n";
-            }
-            
-            // ▼ 生のJSONの代わりにSS1コードを出力するように変更
-            output += "▼ SS1 CODE ▼\n";
-            output += ss1Code;
-            
-            navigator.clipboard.writeText(output); 
-            showMsg(languageMap[currentLanguage].msgExported); 
-        }
+    let output = "";
+    const title = data.n || "Simple Sheet";
+    output += `【 ${title} 】\n\n`;
+    
+    const memo = data.m || "";
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const matches = memo.match(urlRegex);
+    if(matches && matches.length > 0) {
+        output += "[Links]\n";
+        matches.forEach(url => { output += `${url}\n`; });
+        output += "\n";
+    }
+    
+    // ▼ テキストの代わりにURLを前面に押し出す ▼
+    output += "▼ リンクを開いてデータを取り込む ▼\n";
+    output += shareUrl + "\n";
+    
+    navigator.clipboard.writeText(output); 
+    showMsg(languageMap[currentLanguage].msgExported); 
+}
 
-        // ★無料版と同じ、強力な復旧機能を持ったインポート
         function executeImport() {
             let rawText = document.getElementById('importText').value;
             if(!rawText) return;
             
             try {
-                const ss1Match = rawText.match(/SS1:[A-Za-z0-9+/=]+/);
+                // ▼ SS1v1 に変更
+                const ss1Match = rawText.match(/SS1v1:[A-Za-z0-9+/=]+/);
                 if (ss1Match) {
-                    const compressed = ss1Match[0].substring(4); // "SS1:" を削る
+                    const compressed = ss1Match[0].substring(6); // "SS1v1:" (6文字) を削る
                     const decompressed = LZString.decompressFromBase64(compressed);
                     if (decompressed) {
                         applyData(JSON.parse(decompressed));
@@ -830,6 +856,7 @@
     </script>
 </body>
 </html>
+
 
 
 
