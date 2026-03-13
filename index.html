@@ -234,7 +234,7 @@
             <div class="utility-bar">
                 <button class="util-btn manual" style="width: auto; background:#17a2b8;" onclick="openManual()" id="btnManual">❓ Help</button>
                 <button class="util-btn" onclick="openImport()">📥 <span id="btnImport">Imp</span></button>
-                <button class="util-btn" onclick="copyExcel()" id="btnCopyAllTop" style="background:#6c757d;">📋 <span id="btnCopyAllText">Copy All</span></button>
+                <button class="util-btn" onclick="copyAll()" id="btnCopyAllTop" style="background:#6c757d;">📋 <span id="btnCopyAllText">Copy All</span></button>
                 <button class="util-btn reset" onclick="fullReset()">🔄 <span id="btnReset">Reset</span></button>
             </div>
 
@@ -250,7 +250,7 @@
                 
                 <div style="text-align: center; margin-top: 15px; display: flex; gap: 8px;">
                     <button class="mode-button" id="addBtn" style="background:#28a745; color:white; flex:1; justify-content:center; border:none; border-radius:6px; padding:12px; font-weight:bold; font-size:1.1rem; cursor:pointer;" onclick="addRow()">+ Row</button>
-                    <button class="mode-button" id="copyShareBtn" style="background:#007bff; color:white; flex:1; justify-content:center; border:none; border-radius:6px; padding:12px; font-weight:bold; font-size:1.1rem; cursor:pointer;" onclick="copyShare()">🔗 Share</button>
+                    <button class="mode-button" id="copyShareBtn" style="background:#007bff; color:white; flex:1; justify-content:center; border:none; border-radius:6px; padding:12px; font-weight:bold; font-size:1.1rem; cursor:pointer;" onclick="copyShare()">📤 Share</button>
                 </div>
             </div>
 
@@ -309,19 +309,22 @@
         }
 
         const manualBase = {
-            ja: "Simple Sheet について\n\n電卓より整理できて、\nスプレッドシートほど複雑ではありません。\n\n【🔗 Share】\n5行に短縮されたSNS用のテキストと短いURLをコピーします。\n\n【📋 Copy All】\nそのままExcelに貼れる3列の表データをコピーします。(Pro版限定)",
-            en: "About Simple Sheet\n\nMore organized than a calculator,\nLess complicated than a spreadsheet.\n\n【🔗 Share】\nCopies a compact text & short URL for SNS.\n\n【📋 Copy All】\nCopies a full 3-column table perfect for Excel or AI analysis. (Pro feature)"
+            ja: "Simple Sheet について\n\n電卓より整理できて、\nスプレッドシートほど複雑ではありません。\n\n【📤 Share】\n5行に短縮されたSNS用のテキストと短いURLをコピーします。\n\n【📋 Copy All】\nそのままExcelに貼れる3列の表データをコピーします。(Pro版限定)",
+            en: "About Simple Sheet\n\nMore organized than a calculator,\nLess complicated than a spreadsheet.\n\n【📤 Share】\nCopies a compact text & short URL for SNS.\n\n【📋 Copy All】\nCopies a full 3-column table perfect for Excel or AI analysis. (Pro feature)"
         };
         const manualFooterFree = { ja: "【制限】保存とCopy All機能はPro版限定です。", en: "【Limits】Saving & Copy All are Pro features." };
         const manualFooterPro = { ja: "【Pro版】全機能が利用可能です。", en: "【Pro Version】All features unlocked." };
 
+        // ★ 言語ごとのテキストを整理
         const languageMap = {
-            en: { title: "Simple Sheet", masterLabelName: "Title", baseName: "Base", rowLabel: "Item Name", copyMsg: "Copied!", btnImport: "Imp", btnReset: "Reset", confirmReset: "Reset all?", addRow: "+ Row", btnShare: "🔗 Share", btnCopyAll: "Copy All", calcTitle: "Calculator", btnSave: "💾 Save",
+            en: { title: "Simple Sheet", masterLabelName: "Title", baseName: "Base", rowLabel: "Item Name", copyMsg: "Copied!", btnImport: "Imp", btnReset: "Reset", confirmReset: "Reset all?", addRow: "+ Row", btnShare: "📤 Share", btnCopyAll: "Copy All", calcTitle: "Calculator", btnSave: "💾 Save",
                   btnHelp: "❓ Help", btnClose: "Close", msgSave: "Saved!", msgLoad: "Loaded!", confirmDel: "Delete?", msgError: "Error", impTitle:"Import Data", impDesc:"Paste data here:", btnLoad:"Load Data", memoTitle: "📝 MEMO",
-                  proTitle: "Get Pro Version 💎", proDesc: "Save, Memo, and Copy All export are Pro features.", proBtn: "Go to App Store", btnProLink: "🚀 How to get Pro?"},
-            ja: { title: "Simple Sheet", masterLabelName: "タイトル", baseName: "基準", rowLabel: "項目名", copyMsg: "コピー完了", btnImport: "読込", btnReset: "初期化", confirmReset: "全削除しますか？", addRow: "+ 行を追加", btnShare: "🔗 Share", btnCopyAll: "Copy All", calcTitle: "電卓", btnSave: "💾 記憶",
+                  proTitle: "Get Pro Version 💎", proDesc: "Save, Memo, and Copy All are Pro features.", proBtn: "Go to App Store", btnProLink: "🚀 How to get Pro?",
+                  shareMore: "...and {N} more", memoHeader: "[ Memo ]", editLinkText: "▽ Edit in Simple Sheet ▽"},
+            ja: { title: "Simple Sheet", masterLabelName: "タイトル", baseName: "基準", rowLabel: "項目名", copyMsg: "コピー完了", btnImport: "読込", btnReset: "初期化", confirmReset: "全削除しますか？", addRow: "+ 行を追加", btnShare: "📤 シェア", btnCopyAll: "オールコピー", calcTitle: "電卓", btnSave: "💾 記憶",
                   btnHelp: "❓ ヘルプ", btnClose: "閉じる", msgSave: "保存しました", msgLoad: "読み込みました", confirmDel: "削除しますか？", msgError: "エラー", impTitle:"データの読込", impDesc:"ここにデータを貼り付け:", btnLoad:"読込開始", memoTitle: "📝 メモ",
-                  proTitle: "Pro版のご案内 💎", proDesc: "保存、メモ機能、Excel用の全件出力はPro版限定です。", proBtn: "アプリストアへ", btnProLink: "🚀 Pro版を使うには？"}
+                  proTitle: "Pro版のご案内 💎", proDesc: "保存、メモ機能、全件出力はPro版限定です。", proBtn: "アプリストアへ", btnProLink: "🚀 Pro版を使うには？",
+                  shareMore: "...他 {N} 項目", memoHeader: "[ メモ ]", editLinkText: "▽ Edit in Simple Sheet ▽"}
         };
 
         function init() {
@@ -442,13 +445,14 @@
             updateDisplay();
         }
 
+        // --- 🚀 新規格 SS2 安全なエンコード処理 ---
         function encodeSS2(data) {
             let parts = [];
             parts.push(`H~${encodeURIComponent(data.n || '')}`);
             parts.push(`B~${encodeURIComponent(data.bn || '')}~${data.b || ''}`);
             if (data.r) {
                 data.r.forEach(r => {
-                    parts.push(`I~${encodeURIComponent(r.n || '')}~${r.p || ''}~${r.o || '+'}~${r.pct ? 1 : 0}~${r.c ? 1 : 0}`);
+                    parts.push(`I~${encodeURIComponent(r.n || '')}~${r.p !== "" ? r.p : ''}~${encodeURIComponent(r.o || '+')}~${r.pct ? 1 : 0}~${r.c ? 1 : 0}`);
                 });
             }
             if (data.m) {
@@ -469,7 +473,7 @@
                 else if (chunks[0] === 'I') {
                     data.r.push({
                         n: decodeURIComponent(chunks[1] || ''), p: parseFloat(chunks[2]) || 0,
-                        o: chunks[3] || '+', pct: chunks[4] === '1', c: chunks[5] === '1'
+                        o: decodeURIComponent(chunks[3] || '+'), pct: chunks[4] === '1', c: chunks[5] === '1'
                     });
                 }
                 else if (chunks[0] === 'M') {
@@ -717,18 +721,21 @@
             return res;
         }
 
-        // --- 🔗 【SNS用】シェアコピー（ティザー仕様） ---
+        // --- 📤 【SNS用】シェアコピー（ティザー仕様） ---
         async function copyShare() { 
+            const d = languageMap[currentLanguage] || languageMap['en'];
             const data = getScreenData();
             const compressed = encodeSS2(data);
+            // 💡 リンク先を thejetdev に完全固定
             const shareUrl = `https://thejetdev.github.io/Simple-Sheet/?data=SS2:${encodeURIComponent(compressed)}`;
 
             const title = data.n || 'Sheet';
-            const baseName = data.bn || 'Base';
+            const baseName = data.bn || d.baseName || 'Base';
             const baseVal = document.getElementById('masterInput').value || '0';
 
-            let text = `📊 ${title}\n\n`;
-            text += `🏠 ${baseName} : ${baseVal}\n`;
+            // 絵文字を削除
+            let text = `${title}\n\n`;
+            text += `${baseName} : ${baseVal}\n`;
 
             const itemsTextArr = [];
             document.querySelectorAll('#rows-container .row').forEach(r => {
@@ -746,12 +753,12 @@
             }
 
             if (itemsTextArr.length > lineCount) {
-                text += `...他 ${itemsTextArr.length - lineCount} 項目\n`;
+                text += d.shareMore.replace('{N}', itemsTextArr.length - lineCount) + "\n";
             }
 
             const memo = document.getElementById('memoArea').value;
             if (memo) {
-                text += `\n[ Memo ]\n`;
+                text += `\n${d.memoHeader}\n`;
                 const maxMemoLen = 250 - text.length - 45; 
                 if (maxMemoLen > 10) {
                     text += memo.length > maxMemoLen ? memo.substring(0, maxMemoLen).replace(/\n/g, ' ') + "...\n" : memo + "\n";
@@ -760,32 +767,32 @@
                 }
             }
 
-            text += `\n▽ Edit in Simple Sheet ▽\n${shareUrl}`;
+            text += `\n${d.editLinkText}\n${shareUrl}`;
 
             try {
                 await navigator.clipboard.writeText(text);
-                showMsg(languageMap[currentLanguage].copyMsg);
+                showMsg(d.copyMsg);
             } catch (err) { showMsg("Error"); }
         }
 
-        // --- 📋 【Excel用】フルデータコピー（Pro仕様） ---
-        async function copyExcel() {
+        // --- 📋 【Excel用】Copy All（Pro仕様） ---
+        async function copyAll() {
             if (!isPro) { triggerProPromo(); return; }
-
+            const d = languageMap[currentLanguage] || languageMap['en'];
             const data = getScreenData();
             const compressed = encodeSS2(data);
             const shareUrl = `https://thejetdev.github.io/Simple-Sheet/?data=SS2:${encodeURIComponent(compressed)}`;
 
             const title = data.n || 'Sheet';
-            const baseName = data.bn || 'Base';
+            const baseName = data.bn || d.baseName || 'Base';
             const baseVal = document.getElementById('masterInput').value || '0';
 
-            // プレーンテキスト（フォールバック用：タブ2つでB列を空け、AとCに配置するExcelの挙動に合わせる）
+            // プレーンテキスト（フォールバック用）
             let t = `【${escapeForExcel(title)}】\n${baseName}\t\t${baseVal}\n`;
             
-            // HTML形式（colspan="2" でA列とB列を結合して項目名を入れる）
-            let h = `<table><tr><th colspan="3" style="text-align:center; background-color:#EFEFEF; font-size:14pt; padding:5px;">📊 ${escapeHtml(title)}</th></tr>`;
-            h += `<tr><td colspan="2" style="padding:3px 5px;">🏠 ${escapeHtml(baseName)}</td><td style="text-align:right; padding:3px 5px;">${escapeHtml(baseVal)}</td></tr>`;
+            // HTML形式（A・B列結合で絵文字なし）
+            let h = `<table><tr><th colspan="3" style="text-align:center; background-color:#EFEFEF; font-size:14pt; padding:5px;">${escapeHtml(title)}</th></tr>`;
+            h += `<tr><td colspan="2" style="padding:3px 5px;">${escapeHtml(baseName)}</td><td style="text-align:right; padding:3px 5px;">${escapeHtml(baseVal)}</td></tr>`;
 
             document.querySelectorAll('#rows-container .row').forEach(r => {
                 const label = r.querySelector('.text-label-input').value || '-';
@@ -796,10 +803,10 @@
 
             const memo = document.getElementById('memoArea').value;
             if (memo) {
-                t += `\n[Memo]\n${escapeForExcel(memo)}\n`;
-                h += `<tr><td colspan="3" style="background-color:#FFF2CC; padding:8px 5px;">📝 <b>Memo</b><br>${insertAutoBreaks(memo)}</td></tr>`;
+                t += `\n${d.memoHeader}\n${escapeForExcel(memo)}\n`;
+                h += `<tr><td colspan="3" style="background-color:#FFF2CC; padding:8px 5px;"><b>${escapeHtml(d.memoHeader)}</b><br>${insertAutoBreaks(memo)}</td></tr>`;
 
-                // ★ メモ帳内のリンク抽出（Excel貼り付け時のリストアップ機能）
+                // ★ メモ帳内のリンク抽出復活
                 const urlRegex = /(https?:\/\/[^\s]+)/g;
                 const matches = memo.match(urlRegex);
                 if(matches) {
@@ -812,18 +819,18 @@
                 }
             }
 
-            t += `\n▽ Edit in Simple Sheet ▽\n${shareUrl}\n`;
-            h += `<tr><td colspan="3" style="padding:5px; border-top: 2px solid #ccc; font-weight:bold;">▽ Edit in Simple Sheet ▽</td></tr>`;
+            t += `\n${d.editLinkText}\n${shareUrl}\n`;
+            h += `<tr><td colspan="3" style="padding:5px; border-top: 2px solid #ccc; font-weight:bold;">${escapeHtml(d.editLinkText)}</td></tr>`;
             h += `<tr><td colspan="3" style="padding:5px;"><a href="${shareUrl}">${shareUrl}</a></td></tr>`;
             h += `</table>`;
 
             try {
                 const item = new ClipboardItem({ 'text/plain': new Blob([t], { type: 'text/plain' }), 'text/html': new Blob([h], { type: 'text/html' }) });
                 await navigator.clipboard.write([item]);
-                showMsg(languageMap[currentLanguage].copyMsg);
+                showMsg(d.copyMsg);
             } catch (err) {
-                navigator.clipboard.writeText(t); // HTTP環境等でのフォールバック
-                showMsg(languageMap[currentLanguage].copyMsg + " (Text)");
+                navigator.clipboard.writeText(t); 
+                showMsg(d.copyMsg + " (Text)");
             }
         }
 
@@ -832,7 +839,6 @@
             if(!rawText) { showMsg("Paste data"); return; }
 
             try {
-                // SS2形式の抽出
                 const ss2Match = rawText.match(/SS2(?:%3A|:)[A-Za-z0-9+/=%-]+/);
                 if (ss2Match) {
                     let extracted = ss2Match[0];
@@ -846,7 +852,6 @@
                     }
                 }
 
-                // SS1形式の抽出（後方互換）
                 const ss1Match = rawText.match(/SS1v1(?:%3A|:)[A-Za-z0-9+/=% ]+/);
                 if (ss1Match) {
                     let extracted = ss1Match[0];
@@ -884,7 +889,7 @@
             if (startRowIdx < lines.length) {
                 const rowText = lines[startRowIdx];
                 const baseValMatch = rowText.match(/[\d\.-]+/);
-                if (rowText.includes("Base") || rowText.includes("元") || rowText.includes("🏠") || (!rowText.includes("\t") && baseValMatch)) {
+                if (rowText.includes("Base") || rowText.includes("元") || (!rowText.includes("\t") && baseValMatch)) {
                     if (baseValMatch) base = parseFloat(baseValMatch[0]); startRowIdx++;
                 }
             }
@@ -892,7 +897,7 @@
             let readingMemo = false; let memoContent = "";
             for (let i = startRowIdx; i < lines.length; i++) {
                 const line = lines[i].trim(); if (!line) continue;
-                if (line.includes("[Memo]") || line.includes("📝") || line.includes("Edit in Simple Sheet")) { readingMemo = true; continue; }
+                if (line.includes("[Memo]") || line.includes("[ メモ ]") || line.includes("📝") || line.includes("Edit in Simple Sheet")) { readingMemo = true; continue; }
                 if (readingMemo) { 
                     if(line.includes("Edit in Simple Sheet")) break; 
                     if (!line.startsWith("Link\t")) memoContent += line + "\n"; 
