@@ -234,6 +234,7 @@
             <div class="utility-bar">
                 <button class="util-btn manual" style="width: auto; background:#17a2b8;" onclick="openManual()" id="btnManual">❓ Help</button>
                 <button class="util-btn" onclick="openImport()">📥 <span id="btnImport">Imp</span></button>
+                <button class="util-btn" onclick="copyExcel()" id="btnCopyAllTop" style="background:#6c757d;">📋 <span id="btnCopyAllText">Copy All</span></button>
                 <button class="util-btn reset" onclick="fullReset()">🔄 <span id="btnReset">Reset</span></button>
             </div>
 
@@ -250,7 +251,6 @@
                 <div style="text-align: center; margin-top: 15px; display: flex; gap: 8px;">
                     <button class="mode-button" id="addBtn" style="background:#28a745; color:white; flex:1; justify-content:center; border:none; border-radius:6px; padding:12px; font-weight:bold; font-size:1.1rem; cursor:pointer;" onclick="addRow()">+ Row</button>
                     <button class="mode-button" id="copyShareBtn" style="background:#007bff; color:white; flex:1; justify-content:center; border:none; border-radius:6px; padding:12px; font-weight:bold; font-size:1.1rem; cursor:pointer;" onclick="copyShare()">🔗 Share</button>
-                    <button class="mode-button" id="copyExcelBtn" style="background:#6c757d; color:white; flex:1; justify-content:center; border:none; border-radius:6px; padding:12px; font-weight:bold; font-size:1.1rem; cursor:pointer;" onclick="copyExcel()">📊 Excel/AI</button>
                 </div>
             </div>
 
@@ -309,17 +309,17 @@
         }
 
         const manualBase = {
-            ja: "Simple Sheet について\n\n電卓より整理できて、\nスプレッドシートほど複雑ではありません。\n\n【シェア用コピー】\n5行に短縮されたSNS用のテキストと短いURLをコピーします。\n\n【Excel/AI用コピー】\nそのままExcelに貼れる3列の表データをコピーします。(Pro版限定)",
-            en: "About Simple Sheet\n\nMore organized than a calculator,\nLess complicated than a spreadsheet.\n\n【Share Copy】\nCopies a compact text & short URL for SNS.\n\n【Excel/AI Copy】\nCopies a full 3-column table perfect for Excel or AI analysis. (Pro feature)"
+            ja: "Simple Sheet について\n\n電卓より整理できて、\nスプレッドシートほど複雑ではありません。\n\n【🔗 Share】\n5行に短縮されたSNS用のテキストと短いURLをコピーします。\n\n【📋 Copy All】\nそのままExcelに貼れる3列の表データをコピーします。(Pro版限定)",
+            en: "About Simple Sheet\n\nMore organized than a calculator,\nLess complicated than a spreadsheet.\n\n【🔗 Share】\nCopies a compact text & short URL for SNS.\n\n【📋 Copy All】\nCopies a full 3-column table perfect for Excel or AI analysis. (Pro feature)"
         };
-        const manualFooterFree = { ja: "【制限】保存とExcelコピー機能はPro版限定です。", en: "【Limits】Saving & Excel Copy are Pro features." };
+        const manualFooterFree = { ja: "【制限】保存とCopy All機能はPro版限定です。", en: "【Limits】Saving & Copy All are Pro features." };
         const manualFooterPro = { ja: "【Pro版】全機能が利用可能です。", en: "【Pro Version】All features unlocked." };
 
         const languageMap = {
-            en: { title: "Simple Sheet", masterLabelName: "Title", baseName: "Base", rowLabel: "Item Name", copyMsg: "Copied!", btnImport: "Imp", btnReset: "Reset", confirmReset: "Reset all?", addRow: "+ Row", btnShare: "🔗 Share", btnExcel: "📊 Excel/AI", calcTitle: "Calculator", btnSave: "💾 Save",
+            en: { title: "Simple Sheet", masterLabelName: "Title", baseName: "Base", rowLabel: "Item Name", copyMsg: "Copied!", btnImport: "Imp", btnReset: "Reset", confirmReset: "Reset all?", addRow: "+ Row", btnShare: "🔗 Share", btnCopyAll: "Copy All", calcTitle: "Calculator", btnSave: "💾 Save",
                   btnHelp: "❓ Help", btnClose: "Close", msgSave: "Saved!", msgLoad: "Loaded!", confirmDel: "Delete?", msgError: "Error", impTitle:"Import Data", impDesc:"Paste data here:", btnLoad:"Load Data", memoTitle: "📝 MEMO",
-                  proTitle: "Get Pro Version 💎", proDesc: "Save, Memo, and Excel export are Pro features.", proBtn: "Go to App Store", btnProLink: "🚀 How to get Pro?"},
-            ja: { title: "Simple Sheet", masterLabelName: "タイトル", baseName: "基準", rowLabel: "項目名", copyMsg: "コピー完了", btnImport: "読込", btnReset: "初期化", confirmReset: "全削除しますか？", addRow: "+ 行を追加", btnShare: "🔗 シェア", btnExcel: "📊 エクセル/AI", calcTitle: "電卓", btnSave: "💾 記憶",
+                  proTitle: "Get Pro Version 💎", proDesc: "Save, Memo, and Copy All export are Pro features.", proBtn: "Go to App Store", btnProLink: "🚀 How to get Pro?"},
+            ja: { title: "Simple Sheet", masterLabelName: "タイトル", baseName: "基準", rowLabel: "項目名", copyMsg: "コピー完了", btnImport: "読込", btnReset: "初期化", confirmReset: "全削除しますか？", addRow: "+ 行を追加", btnShare: "🔗 Share", btnCopyAll: "Copy All", calcTitle: "電卓", btnSave: "💾 記憶",
                   btnHelp: "❓ ヘルプ", btnClose: "閉じる", msgSave: "保存しました", msgLoad: "読み込みました", confirmDel: "削除しますか？", msgError: "エラー", impTitle:"データの読込", impDesc:"ここにデータを貼り付け:", btnLoad:"読込開始", memoTitle: "📝 メモ",
                   proTitle: "Pro版のご案内 💎", proDesc: "保存、メモ機能、Excel用の全件出力はPro版限定です。", proBtn: "アプリストアへ", btnProLink: "🚀 Pro版を使うには？"}
         };
@@ -386,21 +386,21 @@
         function applyModeUI() {
             const memoArea = document.getElementById('memoArea');
             const unlockCont = document.getElementById('btnUnlockProContainer');
-            const btnExcel = document.getElementById('copyExcelBtn');
+            const btnCopyAllTop = document.getElementById('btnCopyAllTop');
             const d = languageMap[currentLanguage] || languageMap['en'];
             
             if (isPro) {
                 document.getElementById('title').textContent = d.title + " PRO";
                 memoArea.readOnly = false;
                 unlockCont.style.display = "none";
-                btnExcel.textContent = d.btnExcel;
-                btnExcel.style.background = "#6f42c1"; 
+                document.getElementById('btnCopyAllText').innerHTML = d.btnCopyAll;
+                btnCopyAllTop.style.background = "#6f42c1"; 
             } else {
                 document.getElementById('title').textContent = d.title;
                 memoArea.readOnly = true;
                 unlockCont.style.display = "block";
-                btnExcel.innerHTML = d.btnExcel + " <small>🔒Pro</small>";
-                btnExcel.style.background = "#6c757d";
+                document.getElementById('btnCopyAllText').innerHTML = d.btnCopyAll + " <small>🔒Pro</small>";
+                btnCopyAllTop.style.background = "#6c757d";
             }
         }
 
@@ -442,7 +442,6 @@
             updateDisplay();
         }
 
-        // --- 🚀 新規格 SS2 超安全なエンコード処理 ---
         function encodeSS2(data) {
             let parts = [];
             parts.push(`H~${encodeURIComponent(data.n || '')}`);
@@ -456,7 +455,6 @@
                 parts.push(`M~${encodeURIComponent(data.m)}`);
             }
             const rawString = parts.join('!');
-            // 特殊文字の事故を完全に防ぐため、Base64形式のLZStringを採用
             return LZString.compressToBase64(rawString);
         }
 
@@ -723,7 +721,6 @@
         async function copyShare() { 
             const data = getScreenData();
             const compressed = encodeSS2(data);
-            // 💡 正しいドメインに修正＋encodeURIComponentでリンク破壊を防止
             const shareUrl = `https://thejetdev.github.io/Simple-Sheet/?data=SS2:${encodeURIComponent(compressed)}`;
 
             const title = data.n || 'Sheet';
@@ -755,7 +752,6 @@
             const memo = document.getElementById('memoArea').value;
             if (memo) {
                 text += `\n[ Memo ]\n`;
-                // メモが見えなくなるのを防ぐため、最低でも冒頭部分をチラ見せする
                 const maxMemoLen = 250 - text.length - 45; 
                 if (maxMemoLen > 10) {
                     text += memo.length > maxMemoLen ? memo.substring(0, maxMemoLen).replace(/\n/g, ' ') + "...\n" : memo + "\n";
@@ -764,8 +760,7 @@
                 }
             }
 
-            // 💡 誘導テキストの変更
-            text += `\n▽ Open this data in Simple Sheet ▽\n${shareUrl}`;
+            text += `\n▽ Edit in Simple Sheet ▽\n${shareUrl}`;
 
             try {
                 await navigator.clipboard.writeText(text);
@@ -773,7 +768,7 @@
             } catch (err) { showMsg("Error"); }
         }
 
-        // --- 📊 【Excel用】フルデータコピー（Pro仕様） ---
+        // --- 📋 【Excel用】フルデータコピー（Pro仕様） ---
         async function copyExcel() {
             if (!isPro) { triggerProPromo(); return; }
 
@@ -801,12 +796,24 @@
 
             const memo = document.getElementById('memoArea').value;
             if (memo) {
-                t += `\n[Memo]\n${escapeForExcel(memo)}`;
+                t += `\n[Memo]\n${escapeForExcel(memo)}\n`;
                 h += `<tr><td colspan="3" style="background-color:#FFF2CC; padding:8px 5px;">📝 <b>Memo</b><br>${insertAutoBreaks(memo)}</td></tr>`;
+
+                // ★ メモ帳内のリンク抽出（Excel貼り付け時のリストアップ機能）
+                const urlRegex = /(https?:\/\/[^\s]+)/g;
+                const matches = memo.match(urlRegex);
+                if(matches) {
+                    t += "\n[ Links ]\n";
+                    h += `<tr><td colspan="3" style="background-color:#EFEFEF; font-weight:bold; padding:5px;">[ Links ]</td></tr>`;
+                    matches.forEach(url => {
+                        t += `${url}\n`;
+                        h += `<tr><td colspan="3" style="padding:2px 5px;"><a href="${url}" target="_blank">${url}</a></td></tr>`;
+                    });
+                }
             }
 
-            t += `\n▽ Open this data in Simple Sheet ▽\n${shareUrl}\n`;
-            h += `<tr><td colspan="3" style="padding:5px; border-top: 2px solid #ccc; font-weight:bold;">▽ Open this data in Simple Sheet ▽</td></tr>`;
+            t += `\n▽ Edit in Simple Sheet ▽\n${shareUrl}\n`;
+            h += `<tr><td colspan="3" style="padding:5px; border-top: 2px solid #ccc; font-weight:bold;">▽ Edit in Simple Sheet ▽</td></tr>`;
             h += `<tr><td colspan="3" style="padding:5px;"><a href="${shareUrl}">${shareUrl}</a></td></tr>`;
             h += `</table>`;
 
@@ -885,9 +892,9 @@
             let readingMemo = false; let memoContent = "";
             for (let i = startRowIdx; i < lines.length; i++) {
                 const line = lines[i].trim(); if (!line) continue;
-                if (line.includes("[Memo]") || line.includes("📝") || line.includes("Open this data in Simple Sheet")) { readingMemo = true; continue; }
+                if (line.includes("[Memo]") || line.includes("📝") || line.includes("Edit in Simple Sheet")) { readingMemo = true; continue; }
                 if (readingMemo) { 
-                    if(line.includes("Open this data in Simple Sheet")) break; 
+                    if(line.includes("Edit in Simple Sheet")) break; 
                     if (!line.startsWith("Link\t")) memoContent += line + "\n"; 
                     continue; 
                 }
