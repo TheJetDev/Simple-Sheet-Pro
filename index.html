@@ -246,6 +246,7 @@
                     <input type="number" id="masterInput" class="master-input" step="any" placeholder="" oninput="updateDisplay()">
                 </div>
                 <div id="rows-container"></div>
+                
                 <div style="text-align: center; margin-top: 15px; display: flex; gap: 8px;">
                     <button class="mode-button" id="addBtn" style="background:#28a745; color:white; flex:1; justify-content:center; border:none; border-radius:6px; padding:12px; font-weight:bold; font-size:1.1rem; cursor:pointer;" onclick="addRow()">+ Row</button>
                     <button class="mode-button" id="copyShareBtn" style="background:#007bff; color:white; flex:1; justify-content:center; border:none; border-radius:6px; padding:12px; font-weight:bold; font-size:1.1rem; cursor:pointer;" onclick="copyShare()">🔗 Share</button>
@@ -310,7 +311,6 @@
         const manualBase = {
             ja: "Simple Sheet について\n\n電卓より整理できて、\nスプレッドシートほど複雑ではありません。\n\n【シェア用コピー】\n5行に短縮されたSNS用のテキストと短いURLをコピーします。\n\n【Excel/AI用コピー】\nそのままExcelに貼れる3列の表データをコピーします。(Pro版限定)",
             en: "About Simple Sheet\n\nMore organized than a calculator,\nLess complicated than a spreadsheet.\n\n【Share Copy】\nCopies a compact text & short URL for SNS.\n\n【Excel/AI Copy】\nCopies a full 3-column table perfect for Excel or AI analysis. (Pro feature)"
-            // ... (その他言語は省略、既存のものを必要に応じて追加してください)
         };
         const manualFooterFree = { ja: "【制限】保存とExcelコピー機能はPro版限定です。", en: "【Limits】Saving & Excel Copy are Pro features." };
         const manualFooterPro = { ja: "【Pro版】全機能が利用可能です。", en: "【Pro Version】All features unlocked." };
@@ -339,7 +339,6 @@
                 langCont.appendChild(btn);
             });
 
-            // 💡 URL形式の判定 (SS2 と SS1 の両対応)
             const params = new URLSearchParams(window.location.search);
             let urlData = params.get('data');
 
@@ -357,7 +356,6 @@
                         if (decompressed) { applyData(JSON.parse(decompressed)); }
                     } catch(e) { console.error("SS1 Load Error", e); addRow(); }
                 }
-                // URLからデータを消してクリーンに
                 window.history.replaceState({}, document.title, window.location.pathname);
             } else {
                 const savedDataStr = localStorage.getItem('simpleSheetSettings_integrated') || localStorage.getItem('simpleSheetSettings_pro');
@@ -396,7 +394,7 @@
                 memoArea.readOnly = false;
                 unlockCont.style.display = "none";
                 btnExcel.textContent = d.btnExcel;
-                btnExcel.style.background = "#6f42c1"; // Pro仕様のパープル
+                btnExcel.style.background = "#6f42c1"; 
             } else {
                 document.getElementById('title').textContent = d.title;
                 memoArea.readOnly = true;
@@ -444,42 +442,40 @@
             updateDisplay();
         }
 
-        // --- 🚀 新規格 SS2 エンコード/デコード処理 ---
+        // --- 🚀 新規格 SS2 超安全なエンコード処理 ---
         function encodeSS2(data) {
             let parts = [];
-            parts.push(`H~${data.n || ''}`); // Title
-            parts.push(`B~${data.bn || ''}~${data.b || ''}`); // Base Name & Base Value
-            
+            parts.push(`H~${encodeURIComponent(data.n || '')}`);
+            parts.push(`B~${encodeURIComponent(data.bn || '')}~${data.b || ''}`);
             if (data.r) {
                 data.r.forEach(r => {
-                    let safeName = (r.n || '').replace(/~/g, '-').replace(/!/g, '.'); // 予約文字を退避
-                    parts.push(`I~${safeName}~${r.p || ''}~${r.o || '+'}~${r.pct ? 1 : 0}~${r.c ? 1 : 0}`);
+                    parts.push(`I~${encodeURIComponent(r.n || '')}~${r.p || ''}~${r.o || '+'}~${r.pct ? 1 : 0}~${r.c ? 1 : 0}`);
                 });
             }
             if (data.m) {
-                let safeMemo = data.m.replace(/\n/g, '\\n').replace(/~/g, '-').replace(/!/g, '.');
-                parts.push(`M~${safeMemo}`);
+                parts.push(`M~${encodeURIComponent(data.m)}`);
             }
             const rawString = parts.join('!');
-            return LZString.compressToEncodedURIComponent(rawString);
+            // 特殊文字の事故を完全に防ぐため、Base64形式のLZStringを採用
+            return LZString.compressToBase64(rawString);
         }
 
         function decodeSS2(compressedStr) {
-            const raw = LZString.decompressFromEncodedURIComponent(compressedStr);
+            const raw = LZString.decompressFromBase64(compressedStr);
             if (!raw) return null;
             let data = { r: [] };
             raw.split('!').forEach(p => {
                 let chunks = p.split('~');
-                if (chunks[0] === 'H') data.n = chunks[1] || '';
-                else if (chunks[0] === 'B') { data.bn = chunks[1] || ''; data.b = chunks[2] || ''; }
+                if (chunks[0] === 'H') data.n = decodeURIComponent(chunks[1] || '');
+                else if (chunks[0] === 'B') { data.bn = decodeURIComponent(chunks[1] || ''); data.b = chunks[2] || ''; }
                 else if (chunks[0] === 'I') {
                     data.r.push({
-                        n: chunks[1] || '', p: parseFloat(chunks[2]) || 0,
+                        n: decodeURIComponent(chunks[1] || ''), p: parseFloat(chunks[2]) || 0,
                         o: chunks[3] || '+', pct: chunks[4] === '1', c: chunks[5] === '1'
                     });
                 }
                 else if (chunks[0] === 'M') {
-                    data.m = chunks.slice(1).join('~').replace(/\\n/g, '\n');
+                    data.m = decodeURIComponent(chunks[1] || '');
                 }
             });
             return data;
@@ -556,7 +552,7 @@
         function getScreenData() {
             return {
                 n: document.getElementById('masterLabel').value, 
-                bn: document.getElementById('baseNameInput').value, // 新しいベース名
+                bn: document.getElementById('baseNameInput').value,
                 b: document.getElementById('masterInput').value, 
                 m: document.getElementById('memoArea').value, 
                 r: Array.from(document.querySelectorAll('#rows-container .row')).map(r => {
@@ -727,7 +723,8 @@
         async function copyShare() { 
             const data = getScreenData();
             const compressed = encodeSS2(data);
-            const shareUrl = `https://jetdev.github.io/Simple-Sheet/?data=SS2:${compressed}`;
+            // 💡 正しいドメインに修正＋encodeURIComponentでリンク破壊を防止
+            const shareUrl = `https://thejetdev.github.io/Simple-Sheet/?data=SS2:${encodeURIComponent(compressed)}`;
 
             const title = data.n || 'Sheet';
             const baseName = data.bn || 'Base';
@@ -757,15 +754,18 @@
 
             const memo = document.getElementById('memoArea').value;
             if (memo) {
-                text += `\n📝 Memo\n`;
-                const memoLines = memo.split('\n');
-                for (let i=0; i < memoLines.length; i++) {
-                    if (text.length < 220) { text += memoLines[i] + "\n"; } 
-                    else { text += "...\n"; break; }
+                text += `\n[ Memo ]\n`;
+                // メモが見えなくなるのを防ぐため、最低でも冒頭部分をチラ見せする
+                const maxMemoLen = 250 - text.length - 45; 
+                if (maxMemoLen > 10) {
+                    text += memo.length > maxMemoLen ? memo.substring(0, maxMemoLen).replace(/\n/g, ' ') + "...\n" : memo + "\n";
+                } else {
+                    text += "...\n";
                 }
             }
 
-            text += `\nEdit in Simple Sheet:\n${shareUrl}`;
+            // 💡 誘導テキストの変更
+            text += `\n▽ Open this data in Simple Sheet ▽\n${shareUrl}`;
 
             try {
                 await navigator.clipboard.writeText(text);
@@ -779,24 +779,24 @@
 
             const data = getScreenData();
             const compressed = encodeSS2(data);
-            const shareUrl = `https://jetdev.github.io/Simple-Sheet/?data=SS2:${compressed}`;
+            const shareUrl = `https://thejetdev.github.io/Simple-Sheet/?data=SS2:${encodeURIComponent(compressed)}`;
 
             const title = data.n || 'Sheet';
             const baseName = data.bn || 'Base';
             const baseVal = document.getElementById('masterInput').value || '0';
 
-            // プレーンテキスト（フォールバック用）
+            // プレーンテキスト（フォールバック用：タブ2つでB列を空け、AとCに配置するExcelの挙動に合わせる）
             let t = `【${escapeForExcel(title)}】\n${baseName}\t\t${baseVal}\n`;
             
-            // HTML形式（Excel用3列表）
+            // HTML形式（colspan="2" でA列とB列を結合して項目名を入れる）
             let h = `<table><tr><th colspan="3" style="text-align:center; background-color:#EFEFEF; font-size:14pt; padding:5px;">📊 ${escapeHtml(title)}</th></tr>`;
-            h += `<tr><td style="padding:3px 5px;">🏠 ${escapeHtml(baseName)}</td><td style="text-align:center;">:</td><td style="text-align:right; padding:3px 5px;">${escapeHtml(baseVal)}</td></tr>`;
+            h += `<tr><td colspan="2" style="padding:3px 5px;">🏠 ${escapeHtml(baseName)}</td><td style="text-align:right; padding:3px 5px;">${escapeHtml(baseVal)}</td></tr>`;
 
             document.querySelectorAll('#rows-container .row').forEach(r => {
                 const label = r.querySelector('.text-label-input').value || '-';
                 const val = r.querySelector('.result-text').textContent.replace(/,/g, '');
                 t += `${escapeForExcel(label)}\t\t${val}\n`;
-                h += `<tr><td style="padding:3px 5px;">${escapeHtml(label)}</td><td style="text-align:center;">:</td><td style="text-align:right; padding:3px 5px;">${escapeHtml(val)}</td></tr>`;
+                h += `<tr><td colspan="2" style="padding:3px 5px;">${escapeHtml(label)}</td><td style="text-align:right; padding:3px 5px;">${escapeHtml(val)}</td></tr>`;
             });
 
             const memo = document.getElementById('memoArea').value;
@@ -805,8 +805,8 @@
                 h += `<tr><td colspan="3" style="background-color:#FFF2CC; padding:8px 5px;">📝 <b>Memo</b><br>${insertAutoBreaks(memo)}</td></tr>`;
             }
 
-            t += `\nEdit in Simple Sheet:\n${shareUrl}\n`;
-            h += `<tr><td colspan="3" style="padding:5px; border-top: 2px solid #ccc; font-weight:bold;">Edit in Simple Sheet:</td></tr>`;
+            t += `\n▽ Open this data in Simple Sheet ▽\n${shareUrl}\n`;
+            h += `<tr><td colspan="3" style="padding:5px; border-top: 2px solid #ccc; font-weight:bold;">▽ Open this data in Simple Sheet ▽</td></tr>`;
             h += `<tr><td colspan="3" style="padding:5px;"><a href="${shareUrl}">${shareUrl}</a></td></tr>`;
             h += `</table>`;
 
@@ -853,7 +853,6 @@
                     }
                 }
 
-                // 旧プレーンテキスト形式の解析フォールバック
                 if(tryParseText(rawText)){ 
                     showMsg(languageMap[currentLanguage].msgLoad); closeModal('importModal');
                 } else {
@@ -886,9 +885,9 @@
             let readingMemo = false; let memoContent = "";
             for (let i = startRowIdx; i < lines.length; i++) {
                 const line = lines[i].trim(); if (!line) continue;
-                if (line.includes("[Memo]") || line.includes("📝") || line.includes("Edit in Simple Sheet")) { readingMemo = true; continue; }
+                if (line.includes("[Memo]") || line.includes("📝") || line.includes("Open this data in Simple Sheet")) { readingMemo = true; continue; }
                 if (readingMemo) { 
-                    if(line.includes("Edit in Simple Sheet")) break; 
+                    if(line.includes("Open this data in Simple Sheet")) break; 
                     if (!line.startsWith("Link\t")) memoContent += line + "\n"; 
                     continue; 
                 }
