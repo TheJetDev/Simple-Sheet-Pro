@@ -3,22 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Simple Sheet PRO</title>
+    <title>Simple Sheet</title>
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="#e0e0e0">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="favicon-96x96.png">
-　　<script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    
     <style>
         /* --- 基本スタイル --- */
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 8px; background-color: #FFF8E1; margin: 0; box-sizing: border-box; font-size: 16px; color: #000; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 8px; background-color: #f0f2f5; margin: 0; box-sizing: border-box; font-size: 16px; color: #000; transition: background-color 0.5s; }
+        body.pro-mode { background-color: #FFF8E1; } 
         * { box-sizing: border-box; }
         .app-grid { display: flex; gap: 12px; max-width: 1600px; margin: 0 auto; align-items: flex-start; }
         
         /* メモ帳エリア */
         .memo-container { flex: 1; min-width: 250px; background-color: #fff; padding: 12px; border-radius: 10px; box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1); height: 85vh; position: sticky; top: 8px; display: flex; flex-direction: column; }
-        /* 背景色を薄い黄色に変更 */
-        .memo-area { flex: 1; width: 100%; resize: none; border: 1px solid #ccc; border-radius: 8px; padding: 10px; font-size: 0.95em; line-height: 1.5; outline: none; background: #FFF2CC; color: #333; margin-bottom: 10px; }
+        .memo-area { flex: 1; width: 100%; resize: none; border: 1px solid #ccc; border-radius: 8px; padding: 10px; font-size: 0.95em; line-height: 1.5; outline: none; background: #FFF2CC; color: #333; margin-bottom: 10px; transition: background 0.3s; }
+        body:not(.pro-mode) .memo-area { background: #e9ecef; color: #666; cursor: not-allowed; }
         .memo-links { max-height: 150px; overflow-y: auto; padding: 5px; background: #f9f9f9; border-radius: 6px; border: 1px dashed #ccc; }
         .memo-link-item { display: block; padding: 6px; margin-bottom: 4px; background: #e3f2fd; color: #0d47a1; text-decoration: none; border-radius: 4px; font-size: 0.9em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .memo-link-item:hover { background: #bbdefb; }
@@ -30,6 +34,11 @@
         .side-calc { flex: 1; min-width: 260px; background: #333; padding: 12px; border-radius: 10px; color: white; height: fit-content; position: sticky; top: 8px; }
 
         .row { display: flex; margin-bottom: 12px; padding: 12px; border: 1px solid #ccc; border-radius: 10px; background-color: #fff; gap: 8px; }
+        
+        /* ★ドラッグハンドルのスタイル（右側に置くので少しマージンを調整） */
+        .drag-handle { font-size: 2.2em; color: #aaa; cursor: grab; padding: 0 0 0 4px; user-select: none; display: flex; align-items: center; border-left: 2px solid #eee; margin-left: 4px; }
+        .drag-handle:active { cursor: grabbing; color: #007bff; }
+
         @media screen and (min-width: 1001px) {
             .row { flex-direction: row; align-items: center; justify-content: space-between; }
             .text-label-input { flex: 1.5; }
@@ -53,7 +62,7 @@
             .calc-toggle-btn { display: block; }
             .mobile-calc-close { display: block; }
         }
-        /* パーツ類 */
+        
         .text-label-input { padding: 8px; border: 2px solid #000; border-radius: 6px; font-weight: bold; color: #000; outline: none; }
         .calc-area { display: flex; align-items: center; gap: 8px; }
         .multiplier-input { width: 110px; font-size: 1.5em; padding: 8px; text-align: right; border: 3px solid #007bff; border-radius: 6px; font-weight: bold; color: #000; outline: none; }
@@ -67,20 +76,25 @@
         .action-btn { border: none; background: none; cursor: pointer; font-size: 1.8em; opacity: 0.7; padding: 5px; }
         .master-row { padding: 12px; margin-bottom: 12px; border: 3px solid #dc3545; border-radius: 10px; background-color: #fff; display: flex; align-items: center; justify-content: space-between; }
         .master-input { width: 45%; padding: 8px; border: 2px solid #dc3545; border-radius: 6px; font-size: 1.5em; text-align: right; font-weight: bold; color: #000; outline: none; }
-        .storage-bar { background: #dee2e6; border: 2px solid #666; border-radius: 10px; padding: 10px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
+        
+        .storage-bar { background: #e9ecef; border: 2px solid #adb5bd; border-radius: 10px; padding: 10px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; transition: background 0.3s; }
+        .pro-mode .storage-bar { background: #dee2e6; border-color: #666; }
         .storage-controls { display: flex; align-items: center; gap: 10px; }
-        .save-btn-main { background: #e67e22; color: white; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; white-space: nowrap; }
-        .edit-toggle-btn { background: #6c757d; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1.2em; min-width: 50px; }
+        .save-btn-main { background: #6c757d; color: white; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; white-space: nowrap; opacity: 0.9; transition: background 0.3s; }
+        .pro-mode .save-btn-main { background: #e67e22; opacity: 1; }
+        .edit-toggle-btn { background: #6c757d; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1.2em; min-width: 50px; opacity: 0.9; }
         .edit-toggle-btn.active { background: #dc3545; }
         .save-list-container { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0; min-height: 45px; }
         .save-chip { background: #fff; border: 2px solid #007bff; color: #000; padding: 6px 14px; border-radius: 20px; font-size: 0.85em; font-weight: bold; white-space: nowrap; display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
         .save-chip .del-icon { display: none; color: #dc3545; font-size: 1.3em; }
         .editing .save-chip { border-style: dashed; opacity: 0.8; }
         .editing .save-chip .del-icon { display: inline; }
+
         .utility-bar { display: flex; justify-content: center; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
         .util-btn { border: none; background: #6c757d; color: white; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85em; font-weight: bold; min-width: 60px; }
         .util-btn.manual { background: #17a2b8; width: auto; }
         .util-btn.reset { background: #dc3545; }
+
         .calc-display-wrap { position: relative; margin-bottom: 10px; }
         .calc-display { width: 100%; height: 52px; background: #222; color: #fff; text-align: right; font-size: 1.8em; padding: 8px 45px 8px 8px; border-radius: 6px; border: none; outline: none; }
         .calc-copy-btn-in { position: absolute; right: 5px; top: 5px; bottom: 5px; width: 40px; background: #007bff; border: none; border-radius: 4px; font-size: 1.2em; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.9; color: white; }
@@ -89,9 +103,10 @@
         .calc-btn.op { background: #f39c12; }
         .calc-btn.equal { background: #27ae60; grid-column: span 2; }
         .calc-btn.clear { background: #c0392b; }
-        #saveMessage { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); background: #000; color: #fff; padding: 12px 25px; border-radius: 25px; opacity: 0; transition: opacity 0.3s; z-index: 2000; pointer-events: none; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        #saveMessage { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); background: #000; color: #fff; padding: 12px 25px; border-radius: 25px; opacity: 0; transition: opacity 0.3s; z-index: 9999; pointer-events: none; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .calc-toggle-btn { display: none; position: fixed; bottom: 15px; right: 15px; width: 60px; height: 60px; border-radius: 50%; background: #333; color: white; border: none; font-size: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1001; cursor: pointer; }
         .mobile-calc-close { display: none; background: none; border: none; color: white; font-size: 1.5em; cursor: pointer; }
+        
         .pro-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 3000; justify-content: center; align-items: center; padding: 20px; }
         .pro-modal-overlay.active { display: flex; }
         .pro-modal-content { background: #fff; padding: 25px; border-radius: 15px; text-align: center; max-width: 450px; width: 100%; box-shadow: 0 5px 20px rgba(0,0,0,0.3); animation: popIn 0.3s ease; }
@@ -105,19 +120,142 @@
 </head>
 <body onload="init()">
 
-    <div id="startLockScreen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a237e; color: #fff; z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-        <h2 style="font-size: 24px; margin-bottom: 20px;">💎 Simple Sheet PRO</h2>
-        <p style="margin-bottom: 10px;">Enter Passcode</p>
-        <input type="password" id="inputPass" placeholder="****" style="font-size: 24px; padding: 10px; border-radius: 8px; border: none; text-align: center; width: 200px; margin-bottom: 20px; color:#000;">
-        <button onclick="checkStartPass()" style="font-size: 18px; padding: 12px 40px; border-radius: 30px; border: none; background: #28a745; color: white; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">Unlock</button>
-        <p style="margin-top: 30px; font-size: 12px; opacity: 0.8;">(Passcode is in the Android App)</p>
+    <div id="app-banner" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 20px; border-radius: 30px; z-index: 9999; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-family: sans-serif; width: 90%; max-width: 400px; justify-content: space-between; align-items: center;">
+        <span id="banner-text-span" style="font-size: 14px; font-weight: bold;">📱 アプリで快適に開く</span>
+        <div>
+            <a id="app-intent-link" href="#" style="background: #4CAF50; color: white; padding: 8px 16px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 14px; margin-right: 10px;">開く</a>
+            <button onclick="closeAppBanner()" style="background: none; border: none; color: #aaa; font-size: 18px; cursor: pointer; padding: 0;">✖</button>
+        </div>
     </div>
 
+    <script>
+        function closeAppBanner() {
+            document.getElementById('app-banner').style.display = 'none';
+            var expireTime = new Date().getTime() + 604800000; // 7日間
+            localStorage.setItem('hideSimpleSheetBanner', expireTime.toString());
+        }
+
+        var ua = navigator.userAgent;
+        var isAndroid = /android/i.test(ua);
+        var isWebView = /wv/.test(ua) || /Instagram|FBAN|FBAV|Line|Discord|Reddit/i.test(ua);
+        var isFromOutside = document.referrer && document.referrer.indexOf(location.hostname) === -1;
+
+        var hideUntil = localStorage.getItem('hideSimpleSheetBanner');
+        var now = new Date().getTime();
+        // GPT先生推奨の「10進数指定」も入れました
+        var isBannerHidden = hideUntil && now < parseInt(hideUntil, 10);
+
+        if (isAndroid && !isBannerHidden && (isWebView || isFromOutside)) {
+            // 💡 バナー専用の多言語辞書
+            var bannerLangMap = {
+                en: { t: "📱 Open in App", b: "Open" },
+                ja: { t: "📱 アプリで快適に開く", b: "開く" },
+                zh: { t: "📱 在应用中打开", b: "打开" },
+                ko: { t: "📱 앱에서 열기", b: "열기" },
+                es: { t: "📱 Abrir en la app", b: "Abrir" },
+                pt: { t: "📱 Abrir no app", b: "Abrir" },
+                fr: { t: "📱 Ouvrir dans l'appli", b: "Ouvrir" },
+                ru: { t: "📱 Открыть в приложении", b: "Открыть" },
+                de: { t: "📱 In der App öffnen", b: "Öffnen" }
+            };
+
+            // ユーザーが設定した言語（なければスマホの言語）を取得
+            var savedLang = localStorage.getItem('simpleSheetLang_integrated') || navigator.language.slice(0, 2);
+            var langData = bannerLangMap[savedLang] || bannerLangMap['en'];
+
+            // HTMLの文字をその言語に書き換える
+            document.getElementById('banner-text-span').textContent = langData.t;
+            document.getElementById('app-intent-link').textContent = langData.b;
+
+            // URL生成と表示
+            var safePath = location.host + location.pathname + location.search;
+            var fallbackUrl = encodeURIComponent("https://play.google.com/store/apps/details?id=jetdev.simplesheet");
+            var intentUrl = "intent://" + safePath + "#Intent;scheme=https;package=jetdev.simplesheet;S.browser_fallback_url=" + fallbackUrl + ";end;";
+
+            document.getElementById('app-intent-link').href = intentUrl;
+            document.getElementById('app-banner').style.display = 'flex';
+        }
+    </script><div id="app-banner" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 20px; border-radius: 30px; z-index: 9999; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-family: sans-serif; width: 90%; max-width: 400px; justify-content: space-between; align-items: center;">
+        <span id="banner-text-span" style="font-size: 14px; font-weight: bold;">📱 アプリで快適に開く</span>
+        <div>
+            <a id="app-intent-link" href="#" style="background: #4CAF50; color: white; padding: 8px 16px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 14px; margin-right: 10px;">開く</a>
+            <button onclick="closeAppBanner()" style="background: none; border: none; color: #aaa; font-size: 18px; cursor: pointer; padding: 0;">✖</button>
+        </div>
+    </div>
+
+    <script>
+        function closeAppBanner() {
+            document.getElementById('app-banner').style.display = 'none';
+            var expireTime = new Date().getTime() + 604800000; // 7日間
+            localStorage.setItem('hideSimpleSheetBanner', expireTime.toString());
+        }
+
+        var ua = navigator.userAgent;
+        var isAndroid = /android/i.test(ua);
+        var isWebView = /wv/.test(ua) || /Instagram|FBAN|FBAV|Line|Discord|Reddit/i.test(ua);
+        var isFromOutside = document.referrer && document.referrer.indexOf(location.hostname) === -1;
+
+        var hideUntil = localStorage.getItem('hideSimpleSheetBanner');
+        var now = new Date().getTime();
+        // GPT先生推奨の「10進数指定」も入れました
+        var isBannerHidden = hideUntil && now < parseInt(hideUntil, 10);
+
+        if (isAndroid && !isBannerHidden && (isWebView || isFromOutside)) {
+            // 💡 バナー専用の多言語辞書
+            var bannerLangMap = {
+                en: { t: "📱 Open in App", b: "Open" },
+                ja: { t: "📱 アプリで快適に開く", b: "開く" },
+                zh: { t: "📱 在应用中打开", b: "打开" },
+                ko: { t: "📱 앱에서 열기", b: "열기" },
+                es: { t: "📱 Abrir en la app", b: "Abrir" },
+                pt: { t: "📱 Abrir no app", b: "Abrir" },
+                fr: { t: "📱 Ouvrir dans l'appli", b: "Ouvrir" },
+                ru: { t: "📱 Открыть в приложении", b: "Открыть" },
+                de: { t: "📱 In der App öffnen", b: "Öffnen" }
+            };
+
+            // ユーザーが設定した言語（なければスマホの言語）を取得
+            var savedLang = localStorage.getItem('simpleSheetLang_integrated') || navigator.language.slice(0, 2);
+            var langData = bannerLangMap[savedLang] || bannerLangMap['en'];
+
+            // HTMLの文字をその言語に書き換える
+            document.getElementById('banner-text-span').textContent = langData.t;
+            document.getElementById('app-intent-link').textContent = langData.b;
+
+            // URL生成と表示
+            var safePath = location.host + location.pathname + location.search;
+            var fallbackUrl = encodeURIComponent("https://play.google.com/store/apps/details?id=jetdev.simplesheet");
+            var intentUrl = "intent://" + safePath + "#Intent;scheme=https;package=jetdev.simplesheet;S.browser_fallback_url=" + fallbackUrl + ";end;";
+
+            document.getElementById('app-intent-link').href = intentUrl;
+            document.getElementById('app-banner').style.display = 'flex';
+        }
+    </script>
     <div id="saveMessage"></div>
+
+    <div id="proModal" class="pro-modal-overlay">
+        <div class="pro-modal-content" style="max-width:350px;">
+            <div class="pro-icon">💎</div>
+            <div id="modalTitle" class="pro-title">Pro Feature</div>
+            <div id="modalDesc" class="pro-desc" style="text-align:center;"></div>
+            <button class="pro-btn-buy" id="modalBtn" onclick="window.open('https://play.google.com/store/apps/details?id=jetdev.simplesheet', '_blank')">Upgrade to Pro</button>
+            <button class="pro-btn-buy" onclick="closeModal('proModal'); openUnlockModal();" style="background:#1a237e;">Passcode</button>
+            <button class="pro-btn-close" id="btnClosePro" onclick="closeModal('proModal')">Close</button>
+        </div>
+    </div>
+
+    <div id="unlockModal" class="pro-modal-overlay">
+        <div class="pro-modal-content" style="max-width:350px;">
+            <div class="pro-title" style="margin-bottom:20px;">PRO Passcode</div>
+            <input type="password" id="unlockPasscode" placeholder="Passcode" style="font-size:20px; padding:10px; width:80%; text-align:center; margin-bottom:15px; border:2px solid #ccc; border-radius:6px; color:#000; text-transform:uppercase;">
+            <button class="pro-btn-buy" onclick="checkPasscode()" style="background: #28a745;">Unlock</button>
+            <button class="pro-btn-close" onclick="closeModal('unlockModal')">Cancel</button>
+        </div>
+    </div>
 
     <div id="manualModal" class="pro-modal-overlay">
         <div class="pro-modal-content">
-            <div id="manTitle" class="pro-title" style="text-align:center; border-bottom:1px solid #eee; padding-bottom:10px;">Manual</div>
+            <div id="manTitle" class="pro-title" style="text-align:center; border-bottom:1px solid #eee; padding-bottom:10px;">Help</div>
             <div id="manBody" class="pro-desc" style="margin-top:15px; max-height: 400px; overflow-y: auto;"></div>
             <button class="pro-btn-close" onclick="closeModal('manualModal')" id="manClose" style="width:100%; text-decoration:none; background:#eee; padding:10px; border-radius:20px; font-weight:bold; color:#555;">OK</button>
         </div>
@@ -127,9 +265,7 @@
         <div class="pro-modal-content" style="max-width:350px;">
             <div class="pro-title" id="impTitle">Import Data</div>
             <div class="pro-desc" id="impDesc" style="text-align:center; margin-bottom:10px;">Paste data here:</div>
-            
             <textarea id="importText" class="text-area-import" placeholder='Paste code here...' autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
-            
             <button class="pro-btn-buy" id="btnDoImport" onclick="executeImport()" style="background: #007bff;">Load Data</button>
             <button class="pro-btn-close" id="btnCloseImp" onclick="closeModal('importModal')">Close</button>
         </div>
@@ -138,13 +274,15 @@
     <button class="calc-toggle-btn" onclick="toggleCalc()">🧮</button>
 
     <div class="app-grid">
+        
         <div class="memo-container">
             <h3 id="memoTitle" style="margin: 0 0 10px 0; font-size: 1.1em; text-align: center; color: #555;">📝 Memo</h3>
-            <textarea id="memoArea" class="memo-area" placeholder="Write notes here..." oninput="updateMemoLinks(); saveSettings();"></textarea>
+            <textarea id="memoArea" class="memo-area" placeholder="Write notes here..." oninput="updateMemoLinks(); saveSettings();" onclick="handleMemoClick()"></textarea>
             <div id="memoLinks" class="memo-links"></div>
         </div>
 
         <div class="sheet-container">
+            
             <div class="top-controls" style="display:flex; justify-content: space-between; align-items: center; margin-bottom:10px; flex-wrap: wrap; gap:8px;">
                 <div style="flex:1; display:flex; align-items:center; border:2px solid #000; border-radius:6px; padding:6px 10px; min-width:140px; background:#fff;">
                     <input type="text" id="masterLabel" style="border:none; outline:none; font-weight:bold; width:100%; color:#000;" oninput="saveSettings()">
@@ -156,18 +294,20 @@
 
             <div class="storage-bar">
                 <div class="storage-controls">
-                    <button class="save-btn-main" onclick="saveToMemory()">💾 <span id="btnSaveMemory">Save</span></button>
-                    <button id="editToggle" class="edit-toggle-btn" onclick="toggleEditMode()">🗑️</button>
+                    <button class="save-btn-main" id="btnSaveMain" onclick="handleSaveClick()">💾 <span id="btnSaveMemory">Save</span></button>
+                    <button id="editToggle" class="edit-toggle-btn" onclick="handleEditClick()">🗑️</button>
                 </div>
                 <div id="saveList" class="save-list-container"></div>
             </div>
 
-            <h2 id="title" style="font-weight: bold; margin-bottom: 15px; text-align:center;">Simple Sheet PRO</h2>
+            <h2 id="title" style="font-weight: bold; margin-bottom: 15px; text-align:center;">Simple Sheet</h2>
+
+            <div style="text-align: center;" id="btnUnlockProContainer">
+                <button class="title-pro-btn" id="btnLinkPro" onclick="triggerProPromo()">🚀 Go to Pro Version</button>
+            </div>
 
             <div class="utility-bar">
-                <button class="util-btn manual" style="width: auto; background:#17a2b8;" onclick="openManual()" id="btnManual">📖 Manual</button>
-                <button class="util-btn" onclick="clearNumbers()">🧹 <span id="btnClear">Clear</span></button>
-                <button class="util-btn" onclick="exportData()">📤 <span id="btnExport">Exp</span></button>
+                <button class="util-btn manual" style="width: auto; background:#17a2b8;" onclick="openManual()" id="btnManual">❓ Help</button>
                 <button class="util-btn" onclick="openImport()">📥 <span id="btnImport">Imp</span></button>
                 <button class="util-btn reset" onclick="fullReset()">🔄 <span id="btnReset">Reset</span></button>
             </div>
@@ -183,6 +323,7 @@
                     <button class="mode-button" id="copyBtn" style="background:#007bff; color:white; flex-direction:row; min-height:auto; width:100%; justify-content:center; border:none; border-radius:6px; padding:12px; font-weight:bold; font-size:1.1rem; cursor:pointer;" onclick="copyPage()">📋 Copy All</button>
                 </div>
             </div>
+
         </div>
 
         <div id="sideCalc" class="side-calc">
@@ -219,45 +360,105 @@
     </div>
 
     <script>
-        const fullManual = {
-            ja: "Simple Sheet について\n\n電卓より整理できて、\nスプレッドシートほど複雑ではありません。\n\nSimple Sheetは\n計算を整理して残すためのアプリです。\n\n足す、引く、掛ける、割る、\nこの4つの計算で構成します。\n計算の流れはそのまま残ります。\n\n【計算モードの切替】\n🏠 元の数字: 一番上の「元の数字」を使います。\n🔗 チェーン: 一つ上の行の計算結果を使います。\n\nボタンをタップして切り替えます。\n\n【オールコピー (表として使う)】\n計算結果を表としてコピーします。\nExcel や Google スプレッドシートに貼り付けて使えます。\n※長文が隠れないよう、項目名と数字の間に空白列を挟んでいます。\n(JSONコードは含まれません)\n\n【出力 (データとして使う)】\n計算データそのものをコピーします。\nSimple Sheet に貼り付けて、共有・再編集できます。\n\n【読込(インポート)】\nコピーしたテキストを読込画面に貼り付けます。\n\n挨拶文などが混ざっていても、自動でデータだけを抜き出します。\n\n【保存データについて】\n・保存データは、このブラウザ内にのみ保存されます。\n・ブラウザの履歴削除などで消える可能性があります。",
-            en: "About Simple Sheet\n\nMore organized than a calculator,\nLess complicated than a spreadsheet.\n\nSimple Sheet is an app for organizing and keeping your calculations.\n\nIt consists of 4 operations: Add, Subtract, Multiply, Divide.\nThe flow of calculation remains.\n\n【Switching Calc Mode】\n🏠 Base: Uses the top 'Base Value'.\n🔗 Chain: Uses the result of the row directly above.\nTap the button to switch.\n\n【Copy All (Use as Table)】\nCopies the result as a table.\nYou can paste it into Excel or Google Sheets.\n*An empty column is added between Item and Number to prevent text hiding.\n(JSON code is not included)\n\n【Export (Use as Data)】\nCopies the calculation data code.\nPaste into Simple Sheet to share or re-edit.\n\n【Import】\nPaste the copied text into the import screen.\n\n【About Saved Data】\n・Data is saved only in this browser.\n・Data may be lost if browser history/cache is cleared.",
-            zh: "关于 Simple Sheet\n\n比计算器更有条理，\n不像电子表格那么复杂。\n\nSimple Sheet 是一款用于整理和保存计算的应用程序。\n\n由加、减、乘、除四种运算组成。保留计算流程。\n\n【模式切换】\n🏠 初始值: 使用顶部的“初始值”。\n🔗 链: 使用上一行的结果。\n\n【全部复制 (作表使用)】\n将计算结果作为表格复制。\n可粘贴到 Excel 或 Google Sheets 中使用。\n*在项目名和数字之间插入空列以防止文字被遮挡。\n(不包含JSON代码)\n\n【导出 (作数据使用)】\n复制计算数据本身。\n粘贴到 Simple Sheet 中即可分享或重新编辑。\n\n【导入】\n将复制的文本粘贴到导入画面。\n\n【关于保存数据】\n・数据仅保存在此浏览器中。",
-            ko: "Simple Sheet 정보\n\n계산기보다 체계적이고 스프레드시트보다 간단합니다.\n\nSimple Sheet는 계산을 정리하여 남기기 위한 앱입니다.\n\n더하기, 빼기, 곱하기, 나누기 4가지 계산으로 구성됩니다. 계산 흐름이 그대로 남습니다.\n\n【모드 전환】\n🏠 기준값: 맨 위의 '기준값'을 사용합니다.\n🔗 체인: 바로 윗 줄의 결과를 사용합니다.\n\n【전체 복사 (표로 사용)】\n계산 결과를 표로 복사합니다.\nExcel이나 Google 스프레드시트에 붙여넣어 사용할 수 있습니다.\n*긴 텍스트가 가려지지 않도록 빈 열을 추가합니다.\n(JSON 코드는 포함되지 않음)\n\n【출력 (데이터로 사용)】\n계산 데이터 자체를 복사합니다.\nSimple Sheet에 붙여넣어 공유 및 재편집할 수 있습니다.\n\n【불러오기(Import)】\n복사한 텍스트를 불러오기 화면에 붙여넣습니다.\n\n【저장 데이터에 대해】\n・저장 데이터는 이 브라우저에만 저장됩니다.",
-            es: "Sobre Simple Sheet\n\nMás organizado que una calculadora, menos complejo que una hoja de cálculo.\n\nSimple Sheet es una app para organizar y guardar cálculos.\nConsta de sumar, restar, multiplicar y dividir. El flujo del cálculo se mantiene.\n\n【Cambio de modo】\n🏠 Valor Base: Usa el 'Valor Base' superior.\n🔗 Cadena: Usa el resultado de la fila anterior.\n\n【Copiar Todo (Como tabla)】\nCopia el resultado como tabla.\nPegar en Excel o Google Sheets.\n*Se inserta una columna vacía para no ocultar texto largo.\n(No incluye código JSON)\n\n【Exportar (Como datos)】\nCopia los datos del cálculo.\nPegar en Simple Sheet para compartir o reeditar.\n\n【Importar】\nPegue el texto copiado en la pantalla de importación.\n\n【Datos Guardados】\n・Los datos se guardan solo en este navegador.",
-            pt: "Sobre o Simple Sheet\n\nMais organizado que uma calculadora, menos complicado que uma planilha.\n\nSimple Sheet é um app para organizar e manter cálculos.\nConsiste em somar, subtrair, multiplicar e dividir. O fluxo permanece.\n\n【Mudança de Modo】\n🏠 Valor Base: Usa o valor do topo.\n🔗 Cadeia: Usa o resultado da linha anterior.\n\n【Copiar Tudo (Tabela)】\nCopia o resultado como tabela.\n*Insere coluna vazia para não ocultar texto longo.\n(Sem código JSON)\n\n【Exportar (Dados)】\nCopia os dados de cálculo.\nCole no Simple Sheet para compartilhar.\n\n【Importar】\nCole o texto na tela de importação.\n\n【Sobre Dados Salvos】\n・Salvo apenas neste navegador.",
-            fr: "À propos de Simple Sheet\n\nMieux organisé qu'une calculatrice, moins complexe qu'un tableur.\n\nSimple Sheet sert à organiser et conserver vos calculs.\nConstitué de : addition, soustraction, multiplication, division. Le fil reste visible.\n\n【Changement de mode】\n🏠 Valeur Base : Utilise la valeur supérieure.\n🔗 Chaîne : Utilise le résultat précédent.\n\n【Tout Copier (Tableau)】\nCopie le résultat sous forme de tableau.\n*Une colonne vide est ajoutée pour le texte long.\n(Code JSON non inclus)\n\n【Exporter (Données)】\nCopie les données de calcul.\nÀ coller dans Simple Sheet pour partager.\n\n【Importer】\nCollez le texte dans l'écran d'importation.\n\n【À propos des données】\n・Stockées uniquement sur ce navigateur.",
-            ru: "О Simple Sheet\n\nУдобнее, чем калькулятор, проще, чем таблица.\n\nSimple Sheet — приложение для расчетов.\nСложение, вычитание, умножение, деление. Ход вычислений сохраняется.\n\n【Режимы】\n🏠 База: Использует верхнее значение.\n🔗 Цепь: Использует результат предыдущей строки.\n\n【Копировать все (Таблица)】\nКопирует результат как таблицу.\n*Вставляется пустой столбец для длинного текста.\n(Без JSON кода)\n\n【Экспорт (Данные)】\nКопирует данные вычислений.\nВставьте в Simple Sheet для обмена.\n\n【Импорт】\nВставьте текст в экран импорта.\n\n【О данных】\n・Хранятся только в этом браузере.",
-            de: "Über Simple Sheet\n\nÜbersichtlicher als ein Taschenrechner, einfacher als eine Tabelle.\n\nSimple Sheet organisiert Berechnungen.\nAddieren, Subtrahieren, Multiplizieren, Dividieren. Der Weg bleibt erhalten.\n\n【Moduswechsel】\n🏠 Basiswert: Verwendet den oberen Wert.\n🔗 Kette: Verwendet das vorherige Ergebnis.\n\n【Alles Kopieren (Tabelle)】\nKopiert das Ergebnis als Tabelle.\n*Fügt leere Spalte für langen Text ein.\n(Ohne JSON-Code)\n\n【Exportieren (Daten)】\nKopiert die Berechnungsdaten.\nZum Teilen in Simple Sheet einfügen.\n\n【Importieren】\nText in den Import-Bildschirm einfügen.\n\n【Gespeicherte Daten】\n・Nur in diesem Browser gespeichert."
-        };
-
-        const languageMap = {
-            en: { title: "Simple Sheet PRO", masterLabelName: "Title", masterLabelStart: "🏠 Base", rowLabel: "Item Name", copyMsg: "Copied!", btnClear: "Clear", btnExport: "Exp", btnImport: "Imp", btnReset: "Reset", confirmReset: "Reset all?", addRow: "+ Row", copyAll: "📋 Copy All", calcTitle: "Calculator", btnSave: "💾 Save", btnDone: "Done",
-                  manual: "📖 Manual", btnClose: "Close", msgSave: "Saved!", msgLoad: "Loaded!", confirmDel: "Delete?", msgExported: "Data Code Copied!", msgError: "Error", impTitle:"Import Data", impDesc:"Paste data here:", btnLoad:"Load Data", memoTitle: "📝 MEMO" },
-            ja: { title: "Simple Sheet PRO", masterLabelName: "タイトル", masterLabelStart: "🏠 元の数字", rowLabel: "項目名", copyMsg: "コピー完了", btnClear: "クリア", btnExport: "出力", btnImport: "読込", btnReset: "初期化", confirmReset: "全削除しますか？", addRow: "+ 行を追加", copyAll: "📋 オールコピー", calcTitle: "電卓", btnSave: "💾 記憶", btnDone: "完了",
-                  manual: "📖 説明書", btnClose: "閉じる", msgSave: "保存しました", msgLoad: "読み込みました", confirmDel: "削除しますか？", msgExported: "データコードをコピーしました", msgError: "エラー", impTitle:"データの読込", impDesc:"ここにデータを貼り付け:", btnLoad:"読込開始", memoTitle: "📝 メモ" },
-            zh: { title: "Simple Sheet PRO", masterLabelName: "标题", masterLabelStart: "🏠 初始值", rowLabel: "项目名称", copyMsg: "已复制", btnClear: "清除", btnExport: "导出", btnImport: "导入", btnReset: "重置", confirmReset: "确认重置所有数据？", addRow: "+ 添加行", copyAll: "📋 复制", calcTitle: "计算器", btnSave: "💾 保存", btnDone: "完成",
-                  manual: "📖 说明书", btnClose: "关闭", msgSave: "已保存", msgLoad: "已加载", confirmDel: "删除？", msgExported: "代码已复制", msgError: "错误", impTitle:"导入数据", impDesc:"粘贴代码:", btnLoad:"加载", memoTitle: "📝 备忘录" },
-            ko: { title: "Simple Sheet PRO", masterLabelName: "제목", masterLabelStart: "🏠 기준값", rowLabel: "항목 이름", copyMsg: "복사됨", btnClear: "지우기", btnExport: "내보내기", btnImport: "가져오기", btnReset: "초기화", confirmReset: "전체 초기화하시겠습니까?", addRow: "+ 행 추가", copyAll: "📋 복사", calcTitle: "계산기", btnSave: "💾 저장", btnDone: "완료",
-                  manual: "📖 설명서", btnClose: "닫기", msgSave: "저장됨", msgLoad: "로드됨", confirmDel: "삭제?", msgExported: "코드 복사됨", msgError: "오류", impTitle:"데이터 가져오기", impDesc:"코드 붙여넣기:", btnLoad:"로드", memoTitle: "📝 메모" },
-            es: { title: "Simple Sheet PRO", masterLabelName: "Título", masterLabelStart: "🏠 Valor Base", rowLabel: "Nombre del ítem", copyMsg: "¡Copiado!", btnClear: "Borrar", btnExport: "Exp", btnImport: "Imp", btnReset: "Reiniciar", confirmReset: "¿Reiniciar todo?", addRow: "+ Fila", copyAll: "📋 Copiar", calcTitle: "Calculadora", btnSave: "💾 Guardar", btnDone: "Listo",
-                  manual: "📖 Manual", btnClose: "Cerrar", msgSave: "¡Guardado!", msgLoad: "¡Cargado!", confirmDel: "¿Eliminar?", msgExported: "¡Código copiado!", msgError: "Error", impTitle:"Importar", impDesc:"Pegar código:", btnLoad:"Cargar", memoTitle: "📝 Nota" },
-            pt: { title: "Simple Sheet PRO", masterLabelName: "Título", masterLabelStart: "🏠 Valor Base", rowLabel: "Nome do Item", copyMsg: "Copiado!", btnClear: "Limpar", btnExport: "Exp", btnImport: "Imp", btnReset: "Reset", confirmReset: "Reiniciar tudo?", addRow: "+ Linha", copyAll: "📋 Copiar", calcTitle: "Calculadora", btnSave: "💾 Salvar", btnDone: "Concluir",
-                  manual: "📖 Manual", btnClose: "Fechar", msgSave: "Salvo", msgLoad: "Carregado", confirmDel: "Excluir?", msgExported: "Código copiado!", msgError: "Erro", impTitle:"Importar", impDesc:"Cole o código:", btnLoad:"Carregar", memoTitle: "📝 Nota" },
-            fr: { title: "Simple Sheet PRO", masterLabelName: "Titre", masterLabelStart: "🏠 Valeur Base", rowLabel: "Nom de l'élément", copyMsg: "Copié !", btnClear: "Effacer", btnExport: "Exp", btnImport: "Imp", btnReset: "Rétablir", confirmReset: "Tout réinitialiser ?", addRow: "+ Ligne", copyAll: "📋 Copier", calcTitle: "Calculatrice", btnSave: "💾 Enreg.", btnDone: "OK",
-                  manual: "📖 Manuel", btnClose: "Fermer", msgSave: "Enregistré", msgLoad: "Chargé", confirmDel: "Supprimer ?", msgExported: "Code copié !", msgError: "Erreur", impTitle:"Importer", impDesc:"Coller code:", btnLoad:"Charger", memoTitle: "📝 Note" },
-            ru: { title: "Simple Sheet PRO", masterLabelName: "Название", masterLabelStart: "🏠 База", rowLabel: "Имя элемента", copyMsg: "Скопировано!", btnClear: "Сброс", btnExport: "Эксп", btnImport: "Имп", btnReset: "Сброс", confirmReset: "Сбросить всё?", addRow: "+ Ряд", copyAll: "📋 Копия", calcTitle: "Калькулятор", btnSave: "💾 Сохр.", btnDone: "Готово",
-                  manual: "📖 Инфо", btnClose: "Закрыть", msgSave: "Сохранено!", msgLoad: "Загружено!", confirmDel: "Удалить?", msgExported: "Код скопирован!", msgError: "Ошибка", impTitle:"Импорт", impDesc:"Вставьте код:", btnLoad:"Загрузить", memoTitle: "📝 Заметка" },
-            de: { title: "Simple Sheet PRO", masterLabelName: "Titel", masterLabelStart: "🏠 Basiswert", rowLabel: "Elementname", copyMsg: "Kopiert!", btnClear: "Löschen", btnExport: "Exp", btnImport: "Imp", btnReset: "Reset", confirmReset: "Alles zurücksetzen?", addRow: "+ Zeile", copyAll: "📋 Kopieren", calcTitle: "Rechner", btnSave: "💾 Speichern", btnDone: "Fertig",
-                  manual: "📖 Handbuch", btnClose: "Schließen", msgSave: "Gespeichert!", msgLoad: "Geladen!", confirmDel: "Löschen?", msgExported: "Code kopiert!", msgError: "Fehler", impTitle:"Importieren", impDesc:"Code hier einfügen:", btnLoad:"Laden", memoTitle: "📝 Notiz" }
-        };
-
+        const PASS_REAL = "8392"; 
+        let isPro = false;
         let currentLanguage = 'en'; 
         let isEditMode = false;
         let currentCalc = "0";
         let isLoading = false;
 
-    　　function init() {
+        function generateCheckCode(baseStr) {
+            let hash = 0;
+            const secretSalt = "SimpleSheetPro_2026"; 
+            const str = baseStr + secretSalt;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash = hash & hash; 
+            }
+            return Math.abs(hash).toString(16).substring(0, 4).toUpperCase().padStart(4, '0');
+        }
+
+        const manualBase = {
+            ja: "Simple Sheet について\n\n電卓より整理できて、\nスプレッドシートほど複雑ではありません。\n\nSimple Sheet は、\n計算を整理して残すためのアプリです。\n\n足す、引く、掛ける、割る、\nこの4つの計算で構成します。\n計算の流れはそのまま残ります。\n\n【計算モードの切替】\n🏠 元の数字: 一番上の「元の数字」を使います。\n🔗 チェーン: 一つ上の行の計算結果を使います。\n\nボタンをタップして切り替えます。\n\n【オールコピー (共有)】\n計算結果、メモ、復元用URLをすべてコピーします。\nSNSでの共有や、Excelへの貼り付けに使えます。\nURLをタップするだけで、誰でも同じ計算表を開くことができます。\n\n【読込(インポート)】\n通常は、共有されたURLを開くだけで自動的にシートが復元されます。\nリンクが機能しない場合は、共有されたテキストをすべてコピーして、ここに貼り付けてください。\n挨拶文などが含まれていても、データのみが自動的に抽出されて復元されます。\n\n【免責事項】\nメモ欄の内容は投稿者によるものです。外部リンクの利用はご自身の判断でお願いいたします。",
+            en: "About Simple Sheet\n\nMore organized than a calculator,\nLess complicated than a spreadsheet.\n\nSimple Sheet is an app for organizing and managing your calculations.\n\nIt supports four operations: Add, Subtract, Multiply, and Divide.\nThe calculation flow is preserved.\n\n【Switching Calc Mode】\n🏠 Base: Uses the top \"Base Value\".\n🔗 Chain: Uses the result of the row above.\n\n【Copy All (Share)】\nCopies the calculation results, memos, and a restore URL.\nYou can share it on social media or paste it into Excel.\nAnyone can open the same sheet simply by tapping the URL.\n\n【Import】\nNormally, opening a shared URL will automatically restore the sheet.\nIf the link does not work, copy all of the shared text and paste it here.\nEven if greetings or extra text are included, only the data will be extracted and restored automatically.\n\n【Disclaimer】\nThe content in the memo field is provided by the author.\nPlease use external links at your own discretion.",
+            zh: "关于 Simple Sheet\n\n比计算器更有条理，\n不像电子表格那么复杂。\n\nSimple Sheet 是一款用于整理和管理计算的应用程序。\n\n支持加、减、乘、除四种运算。\n计算流程会被保留。\n\n【模式切换】\n🏠 初始值: 使用顶部的“初始值”。\n🔗 链: 使用上一行的结果。\n\n【全部复制 (分享)】\n复制计算结果、备忘录和恢复 URL。\n可用于在社交媒体上分享或粘贴到 Excel 中。\n只需点击 URL，任何人都可以打开相同的计算表。\n\n【导入】\n通常，只需打开分享的 URL 即可自动恢复表格。\n如果链接无法使用，请复制所有分享的文本并将其粘贴到此处。\n即使包含问候语等其他文字，也只会自动提取并恢复数据。\n\n【免责声明】\n备忘录中的内容由作者提供。请自行判断是否使用外部链接。",
+            ko: "Simple Sheet 정보\n\n계산기보다 정리하기 쉽고,\n스프레드시트만큼 복잡하지 않습니다.\n\nSimple Sheet는 계산을 정리하여 관리하기 위한 앱입니다.\n\n더하기, 빼기, 곱하기, 나누기,\n이 네 가지 연산으로 구성됩니다.\n계산 흐름은 그대로 유지됩니다.\n\n【모드 전환】\n🏠 기준값: 맨 위의 \"기준값\"을 사용합니다.\n🔗 체인: 바로 윗 줄의 결과를 사용합니다.\n\n【전체 복사 (공유)】\n계산 결과, 메모, 복원 URL을 모두 복사합니다.\n소셜 미디어에 공유하거나 Excel에 붙여넣기 할 때 사용할 수 있습니다.\nURL을 탭하기만 하면 누구나 같은 시트를 열 수 있습니다.\n\n【불러오기(Import)】\n일반적으로 공유된 URL을 열면 시트가 자동으로 복원됩니다.\n링크가 작동하지 않는 경우, 공유된 텍스트 전체를 복사하여 여기에 붙여넣으세요.\n인사말이나 다른 단어가 포함되어 있어도 데이터만 자동으로 추출되어 복원됩니다.\n\n【면책 조항】\n메모란의 내용은 작성자가 제공한 것입니다. 외부 링크 이용은 본인의 판단하에 주의해서 사용해 주십시오.",
+            es: "Sobre Simple Sheet\n\nMás organizado que una calculadora,\nMenos complicado que una hoja de cálculo.\n\nSimple Sheet es una aplicación para organizar y gestionar tus cálculos.\n\nAdmite cuatro operaciones básicas: Sumar, Restar, Multiplicar y Dividir.\nEl flujo de cálculo se mantiene.\n\n【Cambio de modo】\n🏠 Valor Base: Usa el \"Valor Base\" superior.\n🔗 Cadena: Usa el resultado de la fila anterior.\n\n【Copiar Todo (Compartir)】\nCopia los resultados, notas y una URL de restauración.\nÚselo para compartir en redes sociales o pegar en Excel.\nCualquiera puede abrir la misma hoja tocando la URL.\n\n【Importar】\nNormalmente, al abrir una URL compartida se restaurará la hoja automáticamente.\nSi el enlace no funciona, copie todo el texto compartido y péguelo aquí.\nIncluso si se incluyen saludos u otras palabras, solo se extraerán y restaurarán los datos automáticamente.\n\n【Descargo de responsabilidad】\nEl contenido del campo de notas es proporcionado por el autor. Utilice los enlaces externos a su propia discreción.",
+            pt: "Sobre o Simple Sheet\n\nMais organizado que uma calculadora,\nMenos complicado que uma planilha.\n\nSimple Sheet é um aplicativo para organizar e gerenciar seus cálculos.\n\nSuporta quatro operações básicas: Somar, Subtrair, Multiplicar e Dividir.\nO fluxo de cálculo é preservado.\n\n【Mudança de Modo】\n🏠 Valor Base: Usa o \"Valor Base\" do topo.\n🔗 Cadeia: Usa o resultado da linha anterior.\n\n【Copiar Tudo (Compartilhar)】\nCopia os resultados, notas e uma URL de restauração.\nUse para compartilhar nas redes sociais ou colar no Excel.\nQualquer pessoa pode abrir a planilha tocando na URL.\n\n【Importar】\nNormalmente, abrir uma URL compartilhada restaurará a planilha automaticamente.\nSe o link não funcionar, copie todo o texto compartilhado e cole-o aqui.\nMesmo que saudações ou outras palavras sejam incluídas, apenas os dados serão extraídos e restaurados automaticamente.\n\n【Aviso Legal】\nO conteúdo do campo de nota é fornecido pelo autor. Use links externos a seu próprio critério.",
+            fr: "À propos de Simple Sheet\n\nMieux organisé qu'une calculatrice,\nMoins complexe qu'un tableur.\n\nSimple Sheet sert à organiser et gérer vos calculs.\n\nElle prend en charge quatre opérations de base : Addition, Soustraction, Multiplication et Division.\nLe flux de calcul est conservé.\n\n【Changement de mode】\n🏠 Valeur Base : Utilise la \"Valeur Base\" supérieure.\n🔗 Chaîne : Utilise le résultat précédent.\n\n【Tout Copier (Partager)】\nCopie les résultats, les notes et une URL de restauration.\nÀ utiliser pour partager sur les réseaux sociaux ou coller dans Excel.\nN'importe qui peut ouvrir la même feuille en tapant sur l'URL.\n\n【Importer】\nNormalement, l'ouverture d'une URL partagée restaure la feuille automatiquement.\nSi le lien ne fonctionne pas, copiez tout le texte partagé et collez-le ici.\nMême si des salutations ou d'autres mots sont inclus, seules les données seront automatiquement extraites et restaurées.\n\n【Clause de non-responsabilité】\nLe contenu du champ de la note est fourni par l'auteur. Veuillez utiliser les liens externes à votre propre discrétion.",
+            ru: "О Simple Sheet\n\nУдобнее, чем калькулятор,\nПроще, чем таблица.\n\nSimple Sheet — приложение для организации и управления расчетами.\n\nПоддерживает четыре основные операции: сложение, вычитание, умножение и деление.\nХод вычислений сохраняется.\n\n【Режимы】\n🏠 База: Использует верхнее \"Базовое значение\".\n🔗 Цепь: Использует результат предыдущей строки.\n\n【Копировать все (Поделиться)】\nКопирует результаты, заметки и URL для восстановления.\nИспользуйте для социальных сетей или вставки в Excel.\nЛюбой может открыть таблицу, просто перейдя по URL.\n\n【Импорт】\nОбычно открытие общего URL-адреса автоматически восстанавливает таблицу.\nЕсли ссылка не работает, скопируйте весь опубликованный текст и вставьте его сюда.\nДаже если включены приветствия или другие слова, будут автоматически извлечены и восстановлены только данные.\n\n【Отказ от ответственности】\nСодержимое поля заметок предоставляется автором. Пожалуйста, используйте внешние ссылки на свое усмотрение.",
+            de: "Über Simple Sheet\n\nÜbersichtlicher als ein Taschenrechner,\nEinfacher als eine Tabelle.\n\nSimple Sheet ist eine App zum Organisieren und Verwalten von Berechnungen.\n\nSie unterstützt vier Grundrechenarten: Addieren, Subtrahieren, Multiplizieren und Dividieren.\nDer Berechnungsweg bleibt erhalten.\n\n【Moduswechsel】\n🏠 Basiswert: Verwendet den oberen \"Basiswert\".\n🔗 Kette: Verwendet das vorherige Ergebnis.\n\n【Alles Kopieren (Teilen)】\nKopiert Ergebnisse, Notizen und eine Wiederherstellungs-URL.\nZum Teilen in sozialen Medien oder Einfügen in Excel.\nJeder kann dasselbe Blatt durch Tippen auf die URL öffnen.\n\n【Importieren】\nNormalerweise wird das Blatt durch Öffnen einer geteilten URL automatisch wiederhergestellt.\nWenn der Link nicht funktioniert, kopieren Sie den gesamten geteilten Text und fügen Sie ihn hier ein.\nSelbst wenn Begrüßungen oder andere Wörter enthalten sind, werden automatisch nur die Daten extrahiert und wiederhergestellt.\n\n【Haftungsausschluss】\nDer Inhalt des Notizfeldes wird vom Autor bereitgestellt. Bitte nutzen Sie externe Links nach eigenem Ermessen."
+        };
+
+        const manualFooterFree = {
+            ja: "【機能制限について】\n保存とメモ帳の書き込みはPro版の機能です。",
+            en: "【Feature Limitations】\nSaving and memo writing are Pro version features.",
+            zh: "【关于功能限制】\n保存和备忘录编写是 Pro 版的功能。",
+            ko: "【기능 제한에 대해】\n저장 및 메모 작성은 Pro 버전의 기능입니다.",
+            es: "【Limitaciones de funciones】\nGuardar y escribir notas son funciones de la versión Pro.",
+            pt: "【Limitações de recursos】\nSalvar e escrever notas são recursos da versão Pro.",
+            fr: "【Limitations des fonctionnalités】\nL'enregistrement et la rédaction de notes sont des fonctionnalités de la version Pro.",
+            ru: "【Ограничения функций】\nСохранение и запись заметок — это функции Pro-версии.",
+            de: "【Funktionseinschränkungen】\nDas Speichern und das Schreiben von Notizen sind Funktionen der Pro-Version."
+        };
+
+        const manualFooterPro = {
+            ja: "【Pro版】\n現在Pro版です。\n保存とメモ機能が利用可能です。",
+            en: "【Pro Version】\nThis is the Pro version.\nSaving and memo writing are enabled.",
+            zh: "【Pro版】\n当前为 Pro 版。\n保存和备忘录功能已启用。",
+            ko: "【Pro 버전】\n현재 Pro 버전입니다.\n저장 및 메모 기능을 사용할 수 있습니다.",
+            es: "【Versión Pro】\nEsta es la versión Pro.\nGuardar y escribir notas están habilitados.",
+            pt: "【Versão Pro】\nEsta é a versão Pro.\nSalvar e escrever notas estão ativados.",
+            fr: "【Version Pro】\nCeci est la version Pro.\nL'enregistrement et la rédaction de notes sont activés.",
+            ru: "【Pro Версия】\nЭто Pro-версия.\nСохранение и запись заметок включены.",
+            de: "【Pro-Version】\nDies ist die Pro-Version.\nSpeichern und Notizen sind aktiviert."
+        };
+
+        const languageMap = {
+            en: { title: "Simple Sheet", masterLabelName: "Title", masterLabelStart: "🏠 Base", rowLabel: "Item Name", copyMsg: "Copied!", btnImport: "Imp", btnReset: "Reset", confirmReset: "Reset all?", addRow: "+ Row", copyAll: "📋 Copy All", calcTitle: "Calculator", btnSave: "💾 Save", btnDone: "Done",
+                  btnHelp: "❓ Help", btnClose: "Close", msgSave: "Saved!", msgLoad: "Loaded!", confirmDel: "Delete?", msgError: "Error", impTitle:"Import Data", impDesc:"Paste data here:", btnLoad:"Load Data", memoTitle: "📝 MEMO",
+                  proTitle: "Get Pro Version 💎", proDesc: "Save and Memo editing are Pro features.\n\nBuy the app to get the URL & Passcode for the Pro Web version!", proBtn: "Go to App Store", btnProLink: "🚀 How to get Pro?",
+                  importLink: "▼ Open this data in Simple Sheet ▼"},
+            ja: { title: "Simple Sheet", masterLabelName: "タイトル", masterLabelStart: "🏠 元の数字", rowLabel: "項目名", copyMsg: "コピー完了", btnImport: "読込", btnReset: "初期化", confirmReset: "全削除しますか？", addRow: "+ 行を追加", copyAll: "📋 オールコピー", calcTitle: "電卓", btnSave: "💾 記憶", btnDone: "完了",
+                  btnHelp: "❓ ヘルプ", btnClose: "閉じる", msgSave: "保存しました", msgLoad: "読み込みました", confirmDel: "削除しますか？", msgError: "エラー", impTitle:"データの読込", impDesc:"ここにデータを貼り付け:", btnLoad:"読込開始", memoTitle: "📝 メモ",
+                  proTitle: "Pro版のご案内 💎", proDesc: "保存やPC版の利用はPro版の機能です。\n\nアプリを購入すると、Pro版WebサイトのURLとパスコードが手に入ります！", proBtn: "アプリストアへ", btnProLink: "🚀 Pro版を使うには？",
+                  importLink: "▼ Simple Sheet でこのデータを開く ▼"},
+            zh: { title: "Simple Sheet", masterLabelName: "标题", masterLabelStart: "🏠 初始值", rowLabel: "项目名称", copyMsg: "已复制", btnImport: "导入", btnReset: "重置", confirmReset: "确认重置所有数据？", addRow: "+ 添加行", copyAll: "📋 复制", calcTitle: "计算器", btnSave: "💾 保存", btnDone: "完成",
+                  btnHelp: "❓ 帮助", btnClose: "关闭", msgSave: "已保存", msgLoad: "已加载", confirmDel: "删除？", msgError: "错误", impTitle:"导入数据", impDesc:"粘贴代码:", btnLoad:"加载", memoTitle: "📝 备忘录",
+                  proTitle: "Pro版功能 💎", proDesc: "购买应用以获取Pro版URL和密码。", proBtn: "去商店", btnProLink: "🚀 如何获取Pro?",
+                  importLink: "▼ 在 Simple Sheet 中打开此数据 ▼"},
+            ko: { title: "Simple Sheet", masterLabelName: "제목", masterLabelStart: "🏠 기준값", rowLabel: "항목 이름", copyMsg: "복사됨", btnImport: "가져오기", btnReset: "초기화", confirmReset: "전체 초기화하시겠습니까?", addRow: "+ 행 추가", copyAll: "📋 복사", calcTitle: "계산기", btnSave: "💾 저장", btnDone: "완료",
+                  btnHelp: "❓ 도움말", btnClose: "닫기", msgSave: "저장됨", msgLoad: "로드됨", confirmDel: "삭제?", msgError: "오류", impTitle:"데이터 가져오기", impDesc:"코드 붙여넣기:", btnLoad:"로드", memoTitle: "📝 메모",
+                  proTitle: "Pro 기능 💎", proDesc: "Pro 버전을 구매하여 URL과 코드를 받으세요.", proBtn: "스토어로 이동", btnProLink: "🚀 Pro 버전 받기",
+                  importLink: "▼ Simple Sheet에서 이 데이터 열기 ▼"},
+            es: { title: "Simple Sheet", masterLabelName: "Título", masterLabelStart: "🏠 Valor Base", rowLabel: "Nombre del ítem", copyMsg: "¡Copiado!", btnImport: "Imp", btnReset: "Reiniciar", confirmReset: "¿Reiniciar todo?", addRow: "+ Fila", copyAll: "📋 Copiar", calcTitle: "Calculadora", btnSave: "💾 Guardar", btnDone: "Listo",
+                  btnHelp: "❓ Ayuda", btnClose: "Cerrar", msgSave: "¡Guardado!", msgLoad: "¡Cargado!", confirmDel: "¿Eliminar?", msgError: "Error", impTitle:"Importar", impDesc:"Pegar código:", btnLoad:"Cargar", memoTitle: "📝 Nota",
+                  proTitle: "Función Pro 💎", proDesc: "Compre la app para obtener URL y código Pro.", proBtn: "Ir a la tienda", btnProLink: "🚀 Obtener Pro",
+                  importLink: "▼ Abrir estos datos en Simple Sheet ▼"},
+            pt: { title: "Simple Sheet", masterLabelName: "Título", masterLabelStart: "🏠 Valor Base", rowLabel: "Nome do Item", copyMsg: "Copiado!", btnImport: "Imp", btnReset: "Reset", confirmReset: "Reiniciar tudo?", addRow: "+ Linha", copyAll: "📋 Copiar", calcTitle: "Calculadora", btnSave: "💾 Salvar", btnDone: "Concluir",
+                  btnHelp: "❓ Ajuda", btnClose: "Fechar", msgSave: "Salvo", msgLoad: "Carregado", confirmDel: "Excluir?", msgError: "Erro", impTitle:"Importar", impDesc:"Cole o código:", btnLoad:"Carregar", memoTitle: "📝 Nota",
+                  proTitle: "Recurso Pro 💎", proDesc: "Compre o app para obter URL Pro.", proBtn: "Ir para loja", btnProLink: "🚀 Obter Pro",
+                  importLink: "▼ Abrir estes dados no Simple Sheet ▼"},
+            fr: { title: "Simple Sheet", masterLabelName: "Titre", masterLabelStart: "🏠 Valeur Base", rowLabel: "Nom de l'élément", copyMsg: "Copié !", btnImport: "Imp", btnReset: "Rétablir", confirmReset: "Tout réinitialiser ?", addRow: "+ Ligne", copyAll: "📋 Copier", calcTitle: "Calculatrice", btnSave: "💾 Enreg.", btnDone: "OK",
+                  btnHelp: "❓ Aide", btnClose: "Fermer", msgSave: "Enregistré", msgLoad: "Chargé", confirmDel: "Supprimer ?", msgError: "Erreur", impTitle:"Importer", impDesc:"Coller code:", btnLoad:"Charger", memoTitle: "📝 Note",
+                  proTitle: "Fonctionnalité Pro 💎", proDesc: "Achetez l'app pour obtenir l'URL Pro.", proBtn: "Aller au store", btnProLink: "🚀 Obtenir Pro",
+                  importLink: "▼ Ouvrir ces données dans Simple Sheet ▼"},
+            ru: { title: "Simple Sheet", masterLabelName: "Название", masterLabelStart: "🏠 База", rowLabel: "Имя элемента", copyMsg: "Скопировано!", btnImport: "Имп", btnReset: "Сброс", confirmReset: "Сбросить всё?", addRow: "+ Ряд", copyAll: "📋 Копия", calcTitle: "Калькулятор", btnSave: "💾 Сохр.", btnDone: "Готово",
+                  btnHelp: "❓ Помощь", Закрыть: "Close", msgSave: "Сохранено!", msgLoad: "Загружено!", confirmDel: "Удалить?", msgError: "Ошибка", impTitle:"Импорт", impDesc:"Вставьте код:", btnLoad:"Загрузить", memoTitle: "📝 Заметка",
+                  proTitle: "Pro Версия 💎", proDesc: "Купите приложение для доступа к Pro URL.", proBtn: "В магазин", btnProLink: "🚀 Получить Pro",
+                  importLink: "▼ Открыть эти данные в Simple Sheet ▼"},
+            de: { title: "Simple Sheet", masterLabelName: "Titel", masterLabelStart: "🏠 Basiswert", rowLabel: "Elementname", copyMsg: "Kopiert!", btnImport: "Imp", btnReset: "Reset", confirmReset: "Alles zurücksetzen?", addRow: "+ Zeile", copyAll: "📋 Kopieren", calcTitle: "Rechner", btnSave: "💾 Speichern", btnDone: "Fertig",
+                  btnHelp: "❓ Hilfe", btnClose: "Schließen", msgSave: "Gespeichert!", msgLoad: "Geladen!", confirmDel: "Löschen?", msgError: "Fehler", impTitle:"Importieren", impDesc:"Code hier einfügen:", btnLoad:"Laden", memoTitle: "📝 Notiz",
+                  proTitle: "Pro-Funktion 💎", proDesc: "Kaufen Sie die App für Pro-Zugang.", proBtn: "Zum Store", btnProLink: "🚀 Pro holen",
+                  importLink: "▼ Diese Daten in Simple Sheet öffnen ▼"}
+        };
+
+        function init() {
+            if (localStorage.getItem("proWebUnlocked") === "true") {
+                isPro = true;
+                document.body.classList.add("pro-mode");
+            }
+
             const langCont = document.getElementById('langContainer');
             Object.keys(languageMap).forEach(lang => {
                 const btn = document.createElement('button');
@@ -267,104 +468,149 @@
                 langCont.appendChild(btn);
             });
 
-            // ▼ 追加：URLにデータ（SS1v1）が含まれているかチェック！ ▼
             const params = new URLSearchParams(window.location.search);
             const urlData = params.get('data');
 
             if (urlData && urlData.startsWith('SS1v1:')) {
-                // URLから飛んできた場合：URLのデータを解凍して表示する
                 try {
-                    const compressed = urlData.substring(6); // "SS1v1:" を削る
+                    const compressed = urlData.substring(6).replace(/ /g, '+');
                     const decompressed = LZString.decompressFromBase64(compressed);
                     if (decompressed) {
                         applyData(JSON.parse(decompressed));
-                        // ★超重要：読み込み成功後、URLからパラメータを消してスッキリさせる（リロード時の重複防止）
                         window.history.replaceState({}, document.title, window.location.pathname);
-                        isLoading = false;
                     }
-                } catch(e) {
-                    console.error("URL Load Error", e);
-                    addRow();
-                }
+                } catch(e) { console.error("URL Load Error", e); addRow(); }
             } else {
-                // ▼ URLがない場合はここから下の既存ロジック（ローカルの復元）を実行 ▼
-                const savedDataStr = localStorage.getItem('simpleSheetSettings_pro');
+                const savedDataStr = localStorage.getItem('simpleSheetSettings_integrated') 
+                                  || localStorage.getItem('simpleSheetSettings_final')
+                                  || localStorage.getItem('simpleSheetSettings_pro');
                 if (savedDataStr) {
                     try {
                         const parsed = JSON.parse(savedDataStr);
-                        if (Object.keys(parsed).length === 0) {
-                            addRow();
-                        } else {
-                            applyData(parsed);
-                        }
-                    } catch(e) { 
-                        console.error("Restore error", e); 
-                        addRow();
-                    }
-                } else {
-                    addRow(); 
-                }
-            } // ★忘れずに else を閉じる
-
-            // ▼ ここから下は既存の言語読み込み処理など（そのまま）
-            let savedLang = localStorage.getItem('simpleSheetLang_pro');
-            if(!savedLang) {
-                const browserLang = (navigator.language || 'en').slice(0, 2);
-                if(languageMap[browserLang]) savedLang = browserLang;
-                else savedLang = 'en';
+                        if (Object.keys(parsed).length === 0) addRow();
+                        else applyData(parsed);
+                    } catch(e) { addRow(); }
+                } else { addRow(); }
             }
+
+            let savedLang = localStorage.getItem('simpleSheetLang_integrated') || localStorage.getItem('simpleSheetLang_final') || 'en';
             setLanguage(savedLang); 
             
-            renderSaveList();
+            applyModeUI(); 
+            if(isPro) renderSaveList();
             updateMemoLinks();
+            
+            const rowsContainer = document.getElementById('rows-container');
+            new Sortable(rowsContainer, {
+                handle: '.drag-handle', 
+                animation: 150,
+                onEnd: function() {
+                    updateDisplay();
+                }
+            });
+        }
+
+        function applyModeUI() {
+            const memoArea = document.getElementById('memoArea');
+            const unlockCont = document.getElementById('btnUnlockProContainer');
+            
+            if (isPro) {
+                document.getElementById('title').textContent = languageMap[currentLanguage].title + " PRO";
+                memoArea.readOnly = false;
+                unlockCont.style.display = "none";
+            } else {
+                document.getElementById('title').textContent = languageMap[currentLanguage].title;
+                memoArea.readOnly = true;
+                unlockCont.style.display = "block";
+            }
+        }
+
+        function handleMemoClick() {
+            if (!isPro) triggerProPromo();
+        }
+
+        function handleSaveClick() {
+            if (isPro) {
+                saveToMemory();
+            } else {
+                triggerProPromo();
+            }
+        }
+
+        function handleEditClick() {
+            if (isPro) {
+                toggleEditMode();
+            } else {
+                triggerProPromo();
+            }
         }
 
         function setLanguage(lang) {
             currentLanguage = lang; 
-            localStorage.setItem('simpleSheetLang_pro', lang);
-            const d = languageMap[lang];
+            localStorage.setItem('simpleSheetLang_integrated', lang);
+            const d = languageMap[lang] || languageMap['en'];
             
-            document.getElementById('title').textContent = d.title;
+            document.getElementById('title').textContent = isPro ? d.title + " PRO" : d.title;
             document.getElementById('masterLabel').placeholder = d.masterLabelName;
             document.getElementById('masterLabelStart').textContent = d.masterLabelStart;
-            document.getElementById('btnClear').textContent = d.btnClear;
-            document.getElementById('btnExport').textContent = d.btnExport;
             document.getElementById('btnImport').textContent = d.btnImport;
             document.getElementById('btnReset').textContent = d.btnReset;
             document.getElementById('addBtn').textContent = d.addRow;
             document.getElementById('copyBtn').textContent = d.copyAll;
             document.getElementById('ui-calcTitle').textContent = d.calcTitle;
             document.getElementById('btnSaveMemory').textContent = d.btnSave;
-            document.getElementById('manTitle').textContent = d.manual;
-            document.getElementById('manBody').innerText = fullManual[lang] || fullManual['en'];
+            document.getElementById('modalTitle').textContent = d.proTitle;
+            document.getElementById('modalDesc').innerText = d.proDesc;
+            document.getElementById('modalBtn').textContent = d.proBtn;
+            document.getElementById('btnClosePro').textContent = d.btnClose;
+            document.getElementById('btnLinkPro').textContent = d.btnProLink;
+            
+            document.getElementById('manTitle').textContent = d.btnHelp;
+            document.getElementById('btnManual').textContent = d.btnHelp;
+            
+            let baseText = manualBase[lang] || manualBase['en'];
+            let footerText = isPro ? (manualFooterPro[lang] || manualFooterPro['en']) : (manualFooterFree[lang] || manualFooterFree['en']);
+            document.getElementById('manBody').innerText = baseText + "\n\n" + footerText;
+
             document.getElementById('manClose').textContent = d.btnClose;
-            document.getElementById('btnManual').textContent = d.manual;
             document.getElementById('impTitle').textContent = d.impTitle;
             document.getElementById('impDesc').textContent = d.impDesc;
             document.getElementById('btnDoImport').textContent = d.btnLoad;
             document.getElementById('btnCloseImp').textContent = d.btnClose;
             if(document.getElementById('memoTitle')) document.getElementById('memoTitle').textContent = d.memoTitle;
             
-            const editBtn = document.getElementById('editToggle');
-            editBtn.textContent = isEditMode ? '✓' : '🗑️';
-            
             document.querySelectorAll('.text-label-input').forEach(input => { input.placeholder = d.rowLabel; });
             updateDisplay();
         }
 
-        // ロック画面
-        const PASS_TEST = "5963"; const PASS_REAL = "5963"; 
-        document.addEventListener('DOMContentLoaded', function() {
-            if(localStorage.getItem("proWebUnlocked") === "true") { document.getElementById("startLockScreen").style.display = "none"; }
-        });
-        function checkStartPass() {
-            const val = document.getElementById("inputPass").value;
-            if(val === PASS_TEST || val === PASS_REAL) { alert("Authenticated!"); localStorage.setItem("proWebUnlocked", "true"); document.getElementById("startLockScreen").style.display = "none"; } 
-            else { alert("Wrong Passcode"); document.getElementById("inputPass").value = ""; }
+        function triggerProPromo() { document.getElementById('proModal').classList.add('active'); }
+        function openUnlockModal() { document.getElementById('unlockPasscode').value = ""; document.getElementById('unlockModal').classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        
+        function checkPasscode() {
+            const val = document.getElementById("unlockPasscode").value.trim().toUpperCase();
+            if (val.length === 8 && /^[A-Z0-9]{8}$/.test(val)) {
+                const basePart = val.substring(0, 4);
+                const checkPart = val.substring(4, 8);
+                if (checkPart === generateCheckCode(basePart)) {
+                    localStorage.setItem("proWebUnlocked", "true");
+                    isPro = true;
+                    document.body.classList.add("pro-mode");
+                    closeModal('unlockModal');
+                    applyModeUI();
+                    setLanguage(currentLanguage);
+                    renderSaveList();
+                    showMsg("Pro Unlocked! 💎");
+                    return; 
+                }
+            }
+            showMsg("Invalid Passcode");
         }
 
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-        function openManual() { document.getElementById('manualModal').classList.add('active'); }
+        function openManual() {
+            setLanguage(currentLanguage);
+            document.getElementById('manualModal').classList.add('active'); 
+        }
         function openImport() { document.getElementById('importText').value = ""; document.getElementById('importModal').classList.add('active'); }
 
         function stripError(num) { return parseFloat(num.toPrecision(12)); }
@@ -374,8 +620,10 @@
             const masterValStr = document.getElementById('masterInput').value.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0)).replace(/．/g, '.');
             const mVal = parseFloat(masterValStr) || 0;
             let chain = mVal;
+            
             document.querySelectorAll('#rows-container .row').forEach(r => {
-                const opEl = r.querySelector('.operator-display'); const op = opEl ? opEl.textContent.trim() : '+';
+                const opEl = r.querySelector('.operator-display');
+                const op = opEl ? opEl.textContent.trim() : '+';
                 const inputValStr = r.querySelector('.multiplier-input').value.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0)).replace(/．/g, '.');
                 const mult = parseFloat(inputValStr) || 0;
                 const pct = r.querySelector('.percent-toggle').classList.contains('active');
@@ -392,7 +640,7 @@
                 r.querySelector('.result-text').textContent = formatNum(res);
                 chain = res;
             });
-            saveSettings(); 
+            saveSettings();
         }
 
         function updateMemoLinks() {
@@ -413,7 +661,6 @@
             }
         }
 
-        // ★無料版と同じ、空欄を0にせずそのまま記憶するロジック
         function getScreenData() {
             return {
                 n: document.getElementById('masterLabel').value, 
@@ -423,7 +670,7 @@
                     let rawVal = r.querySelector('.multiplier-input').value;
                     return {
                         n: r.querySelector('.text-label-input').value, 
-                        p: rawVal === "" ? "" : (parseFloat(rawVal) || 0), 
+                        p: rawVal === "" ? "" : (parseFloat(rawVal) || 0),
                         o: r.querySelector('.operator-display').textContent.trim(), 
                         pct: r.querySelector('.percent-toggle').classList.contains('active'), 
                         c: r.querySelector('.base-toggle').classList.contains('chain') 
@@ -432,51 +679,41 @@
             };
         }
 
-        // ★無料版と同じ、重複を防止するロジック
         function applyData(s) {
             if(!s) return;
-            isLoading = true; 
-
+            isLoading = true;
             document.getElementById('masterLabel').value = s.n || s.name || s.masterLabel || '';
             document.getElementById('masterInput').value = s.b || s.base || s.masterInput || '';
             
             let memoText = s.m || s.memo || '';
-            // スマホ版Redditのコピペバグ等でURLがくっついてしまった場合、強制的に改行を挟んで分離する
             memoText = memoText.replace(/([^\s])(https?:\/\/)/gi, '$1\n$2');
             document.getElementById('memoArea').value = memoText;
+            updateMemoLinks();
             
-            document.getElementById('rows-container').innerHTML = ''; 
+            document.getElementById('rows-container').innerHTML = '';
             
             let rowsToLoad = s.r || s.rows || s.simpleRows;
-            if(Array.isArray(rowsToLoad) && rowsToLoad.length > 0) { 
+            if(Array.isArray(rowsToLoad) && rowsToLoad.length > 0) {
                 rowsToLoad.forEach(r => {
                     let op = r.o || r.operator || '+';
                     let label = r.n || r.label || '';
                     let val = (r.p !== undefined) ? r.p : (r.multiplier !== undefined ? r.multiplier : '');
                     let isPct = (r.pct !== undefined) ? r.pct : (r.isPercentActive || false);
                     let isChain = (r.c !== undefined) ? r.c : (r.baseMode === 'chain');
-                    
-                    let rowData = {
-                        label: label, multiplier: val, operator: op, isPercentActive: isPct, baseMode: isChain ? 'chain' : 'master'
-                    };
-                    addRow(rowData);
+                    addRow({ label: label, multiplier: val, operator: op, isPercentActive: isPct, baseMode: isChain ? 'chain' : 'master' });
                 }); 
-            } else { 
-                addRow(); 
-            }
-            
-            updateMemoLinks();
-            
-            isLoading = false; 
-            updateDisplay(); 
+            } else { addRow(); }
+            isLoading = false;
+            updateDisplay();
         }
 
         function saveSettings(){ 
-            if (isLoading) return; 
-            localStorage.setItem('simpleSheetSettings_pro', JSON.stringify(getScreenData())); 
+            if(isLoading) return;
+            localStorage.setItem('simpleSheetSettings_integrated', JSON.stringify(getScreenData())); 
         }
 
         function toggleEditMode() {
+            if(!isPro) return;
             isEditMode = !isEditMode;
             const btn = document.getElementById('editToggle');
             btn.classList.toggle('active', isEditMode);
@@ -485,6 +722,7 @@
         }
 
         function saveToMemory() {
+            if(!isPro) return;
             const data = getScreenData();
             const name = data.n || "No Name";
             let lib = JSON.parse(localStorage.getItem('sheetLibrary_pro') || '[]');
@@ -495,17 +733,14 @@
         }
 
         function renderSaveList() {
+            if(!isPro) return;
             const cont = document.getElementById('saveList');
             const lib = JSON.parse(localStorage.getItem('sheetLibrary_pro') || '[]');
             cont.innerHTML = '';
             lib.slice().reverse().forEach(item => {
-                const chip = document.createElement('div');
-                chip.className = 'save-chip';
-                const nameSpan = document.createElement('span');
-                nameSpan.textContent = item.name;
-                const delIcon = document.createElement('span');
-                delIcon.className = 'del-icon';
-                delIcon.textContent = '🗑';
+                const chip = document.createElement('div'); chip.className = 'save-chip';
+                const nameSpan = document.createElement('span'); nameSpan.textContent = item.name;
+                const delIcon = document.createElement('span'); delIcon.className = 'del-icon'; delIcon.textContent = '🗑';
                 chip.appendChild(nameSpan); chip.appendChild(delIcon);
                 chip.onclick = () => {
                     if(isEditMode) deleteMemory(item.id);
@@ -524,41 +759,73 @@
             }
         }
 
+        function addRow(s=null) {
+            const id = s && s.id ? s.id : Math.random().toString(36).substr(2, 5);
+            const ph = languageMap[currentLanguage].rowLabel;
+            const div = document.createElement('div'); div.className = 'row'; div.dataset.id = id;
+            const isChain = s ? (s.baseMode==='chain') : true; 
+            const val = s ? s.multiplier : '';
+
+            // ★変更：入力欄はそのままにして、右端のゴミ箱の隣に「≡」を配置しました！
+            div.innerHTML = `
+                <input type="text" class="text-label-input" placeholder="${ph}" value="${s?s.label:''}" oninput="saveSettings()">
+                <div class="calc-area">
+                    <div id="base-${id}" class="base-toggle ${isChain?'chain':''}" onclick="this.classList.toggle('chain');this.textContent=this.classList.contains('chain')?'🔗':'🏠';updateDisplay()">
+                        ${isChain?'🔗':'🏠'}
+                    </div>
+                    <div class="operator-group">
+                        <div class="operator-control" onclick="changeOp('${id}',1)">▲</div>
+                        <div class="operator-display" id="op-${id}">${s?s.operator:'+'}</div>
+                        <div class="operator-control" onclick="changeOp('${id}',-1)">▼</div>
+                    </div>
+                    <input type="number" step="any" class="multiplier-input" value="${val}" placeholder="" oninput="updateDisplay()">
+                    <div class="percent-toggle ${s&&s.isPercentActive?'active':''}" onclick="this.classList.toggle('active');updateDisplay()">%</div>
+                </div>
+                <div class="result-area">
+                    <div class="result-text">0</div>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <button class="action-btn" onclick="copyRowVal(this)">📋</button>
+                        <button class="action-btn" onclick="this.closest('.row').remove();updateDisplay()">🗑️</button>
+                        <div class="drag-handle" title="Drag to reorder">≡</div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('rows-container').appendChild(div); 
+            updateDisplay();
+        }
+
+        function changeOp(id, d) { 
+            const ops = ['+','-','×','÷']; 
+            const el = document.getElementById('op-'+id).closest('.row').querySelector('.operator-display');
+            const currentOp = el.textContent.trim();
+            el.textContent = ops[(ops.indexOf(currentOp) + d + 4) % 4]; 
+            updateDisplay(); 
+        }
+
+        function copyRowVal(btn) { 
+            navigator.clipboard.writeText(btn.closest('.result-area').querySelector('.result-text').textContent.replace(/,/g,'')); 
+            showMsg(languageMap[currentLanguage].copyMsg); 
+        }
+
         function escapeForExcel(text) {
             if (!text) return "";
-            let str = String(text);
-            str = str.replace(/\t/g, ' '); 
-            str = str.replace(/"/g, '""'); 
-            if (str.search(/[\n\r"]/) >= 0) {
-                str = `"${str}"`; 
-            }
+            let str = String(text).replace(/\t/g, ' ').replace(/"/g, '""'); 
+            if (str.search(/[\n\r"]/) >= 0) str = `"${str}"`; 
             return str;
         }
 
         function escapeHtml(str) {
             if(!str) return "";
-            return str.replace(/[&<>"']/g, function(m) {
-                return {
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    '"': '&quot;',
-                    "'": '&#039;'
-                }[m];
-            });
+            return str.replace(/[&<>"']/g, function(m) { return {'&': '&amp;','<': '&lt;','>': '&gt;','"': '&quot;',"'": '&#039;'}[m]; });
         }
 
         function insertAutoBreaks(text) {
             let res = "";
             const lines = text.split('\n');
-            lines.forEach((line, idx) => {
+            lines.forEach(line => {
                 if(line.length > 40) {
-                    for(let i=0; i<line.length; i+=40) {
-                        res += escapeHtml(line.substr(i, 40)) + "<br>";
-                    }
-                } else {
-                    res += escapeHtml(line) + "<br>";
-                }
+                    for(let i=0; i<line.length; i+=40) res += escapeHtml(line.substr(i, 40)) + "<br>";
+                } else { res += escapeHtml(line) + "<br>"; }
             });
             return res;
         }
@@ -568,26 +835,18 @@
             const baseLabel = languageMap[currentLanguage].masterLabelStart;
             const baseVal = document.getElementById('masterInput').value;
             
-            // --- 追加：ここでバックアップ用のSS1コードを作っておく ---
             const data = getScreenData();
             const jsonCode = JSON.stringify(data);
-            const compressed = LZString.compressToBase64(jsonCode);
-            const ss1Code = "SS1:" + compressed;
-            // ---------------------------------------------------
+            const ss1Code = "SS1v1:" + LZString.compressToBase64(jsonCode);
+            const shareUrl = "https://thejetdev.github.io/Simple-Sheet/?data=" + encodeURIComponent(ss1Code);
 
-            let t = `【${escapeForExcel(title)}】\n`;
-            t += `${baseLabel}\t\t${baseVal}\n`;
-            
-            let h = `<table>`;
-            h += `<tr><td colspan="3" style="background-color:#EFEFEF; text-align:center; font-size:14pt; padding:5px;">【${escapeHtml(title)}】</td></tr>`;
-            
-            // スプレッドシートの列幅（280pxなど）を指定
+            let t = `【${escapeForExcel(title)}】\n${baseLabel}\t\t${baseVal}\n`;
+            let h = `<table><tr><td colspan="3" style="background-color:#EFEFEF; text-align:center; font-size:14pt; padding:5px;">【${escapeHtml(title)}】</td></tr>`;
             h += `<tr><td style="width: 280px; padding:3px 5px;">${escapeHtml(baseLabel)}</td><td style="width: 20px;"></td><td style="width: 100px; text-align:right; padding:3px 5px;">${escapeHtml(baseVal)}</td></tr>`;
 
             document.querySelectorAll('#rows-container .row').forEach(r => { 
                 const label = r.querySelector('.text-label-input').value || '-';
-                const val = r.querySelector('.result-text').textContent.replace(/,/g,'');
-                
+                const val = r.querySelector('.result-text').textContent.replace(/,/g, '');
                 t += `${escapeForExcel(label)}\t\t${val}\n`; 
                 h += `<tr><td style="padding:3px 5px;">${escapeHtml(label)}</td><td></td><td style="text-align:right; padding:3px 5px;">${escapeHtml(val)}</td></tr>`;
             });
@@ -610,21 +869,14 @@
                 }
             }
 
-            // ▼ 追加：一番最後にSS1 CODEの行を追加！ ▼
-            t += `\n▼ SS1 CODE ▼\n${ss1Code}\n`;
-            h += `<tr><td colspan="3" style="background-color:#EFEFEF; font-weight:bold; padding:5px; border-top: 2px solid #ccc;">▼ SS1 CODE ▼</td></tr>`;
-            h += `<tr><td colspan="3" style="padding:5px; word-break: break-all; font-family: monospace; font-size: 0.85em; color: #555;">${ss1Code}</td></tr>`;
-            // ▲ ここまで ▲
-
+            const linkText = languageMap[currentLanguage].importLink;
+            t += `\n${linkText}\n${shareUrl}\n`;
+            h += `<tr><td colspan="3" style="background-color:#EFEFEF; font-weight:bold; padding:5px; border-top: 2px solid #ccc;">${escapeHtml(linkText)}</td></tr>`;
+            h += `<tr><td colspan="3" style="padding:5px; word-break: break-all; font-family: monospace; font-size: 0.85em;"><a href="${shareUrl}" target="_blank" style="color: #007bff; text-decoration: underline;">${shareUrl}</a></td></tr>`;
             h += `</table>`;
 
             try {
-                const blobText = new Blob([t], { type: 'text/plain' });
-                const blobHtml = new Blob([h], { type: 'text/html' });
-                const item = new ClipboardItem({ 
-                    'text/plain': blobText, 
-                    'text/html': blobHtml 
-                });
+                const item = new ClipboardItem({ 'text/plain': new Blob([t], { type: 'text/plain' }), 'text/html': new Blob([h], { type: 'text/html' }) });
                 await navigator.clipboard.write([item]);
                 showMsg(languageMap[currentLanguage].copyMsg);
             } catch (err) {
@@ -633,164 +885,58 @@
             }
         }
 
-        function exportData() { 
-    const data = getScreenData();
-    const jsonCode = JSON.stringify(data);
-    
-    // --- SS1v1形式に圧縮 ---
-    const compressed = LZString.compressToBase64(jsonCode);
-    const ss1Code = "SS1v1:" + compressed; // ★v1を明記
-    
-    // ★追加：統合URLの生成（これを押せば全環境で開く）
-    // Pro版・ノーマル版ともに、出力するURLはノーマル版へ向ける
-const shareUrl = "https://thejetdev.github.io/Simple-Sheet/?data=" + encodeURIComponent(ss1Code);
-    // -------------------
-
-    let output = "";
-    const title = data.n || "Simple Sheet";
-    output += `【 ${title} 】\n\n`;
-    
-    const memo = data.m || "";
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    const matches = memo.match(urlRegex);
-    if(matches && matches.length > 0) {
-        output += "[Links]\n";
-        matches.forEach(url => { output += `${url}\n`; });
-        output += "\n";
-    }
-    
-    // ▼ テキストの代わりにURLを前面に押し出す ▼
-    output += "▼ リンクを開いてデータを取り込む ▼\n";
-    output += shareUrl + "\n";
-    
-    navigator.clipboard.writeText(output); 
-    showMsg(languageMap[currentLanguage].msgExported); 
-}
-
         function executeImport() {
             let rawText = document.getElementById('importText').value;
-            if(!rawText) return;
-            
+            if(!rawText) { showMsg("Paste data"); return; }
+
             try {
-                // ▼ SS1v1 に変更
-                const ss1Match = rawText.match(/SS1v1:[A-Za-z0-9+/=]+/);
+                const ss1Match = rawText.match(/SS1v1(?:%3A|:)[A-Za-z0-9+/=% ]+/);
                 if (ss1Match) {
-                    const compressed = ss1Match[0].substring(6); // "SS1v1:" (6文字) を削る
-                    const decompressed = LZString.decompressFromBase64(compressed);
-                    if (decompressed) {
-                        applyData(JSON.parse(decompressed));
-                        showMsg(languageMap[currentLanguage].msgLoad);
-                        closeModal('importModal');
-                        return; // 成功したらここで終了
+                    let extracted = ss1Match[0];
+                    try { extracted = decodeURIComponent(extracted); } catch(e) {}
+                    if (extracted.startsWith("SS1v1:")) {
+                        const compressed = extracted.substring(6).replace(/ /g, '+');
+                        const decompressed = LZString.decompressFromBase64(compressed);
+                        if (decompressed) {
+                            applyData(JSON.parse(decompressed));
+                            showMsg(languageMap[currentLanguage].msgLoad);
+                            closeModal('importModal');
+                            return; 
+                        }
                     }
                 }
-                let cleanText = rawText
-                    .replace(/\u00A0/g, " ")
-                    .replace(/[\u200B\u200E\uFEFF\u202A-\u202E]/g, "")
-                    .replace(/[“”]/g, '"')
-                    .replace(/```json/gi, "")
-                    .replace(/```/g, "")
-                    .trim();
 
-                const markerNew = "▼ SS1 CODE ▼";
-                const markerOld = "▼ DATA CODE ▼";
-                if (cleanText.includes(markerNew)) {
-                    cleanText = cleanText.split(markerNew)[1].trim();
-                } else if (cleanText.includes(markerOld)) {
-                    cleanText = cleanText.split(markerOld)[1].trim();
-                }
+                let cleanText = rawText.replace(/\u00A0/g, " ").replace(/[\u200B\u200E\uFEFF\u202A-\u202E]/g, "").replace(/[“”]/g, '"').replace(/```json/gi, "").replace(/```/g, "").trim();
+                const marker = "▼ DATA CODE ▼";
+                if (cleanText.includes(marker)) cleanText = cleanText.split(marker)[1].trim();
 
                 const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
                 if (jsonMatch) {
-                    let jsonPart = jsonMatch[0];
-                    
-                    jsonPart = jsonPart.replace(/\\\[/g, "[").replace(/\\\]/g, "]");
-                    jsonPart = jsonPart.replace(/\\n/g, "§N§");
-                    jsonPart = jsonPart.replace(/\r?\n/g, " ");
-                    jsonPart = jsonPart.replace(/§N§/g, "\\n");
-
-                    const tryParse = (str) => {
-                        try { return JSON.parse(str); } catch(e) { return null; }
-                    };
-                    
+                    let jsonPart = jsonMatch[0].replace(/\\\[/g, "[").replace(/\\\]/g, "]").replace(/\\n/g, "§N§").replace(/\r?\n/g, " ").replace(/§N§/g, "\\n");
+                    const tryParse = (str) => { try { return JSON.parse(str); } catch(e) { return null; } };
                     let j = tryParse(jsonPart) || tryParse(jsonPart + '}') || tryParse(jsonPart + ']}') || tryParse(jsonPart + '}]}');
-                    
                     if (j) {
-                        applyData(j);
-                        showMsg(languageMap[currentLanguage].msgLoad);
-                        closeModal('importModal');
-                        return; 
+                        applyData(j); showMsg(languageMap[currentLanguage].msgLoad); closeModal('importModal'); return; 
                     }
                 }
 
                 if(tryParseText(rawText)){ 
-                    showMsg(languageMap[currentLanguage].msgLoad);
-                    closeModal('importModal');
+                    showMsg(languageMap[currentLanguage].msgLoad); closeModal('importModal');
                 } else {
-                    showMsg(languageMap[currentLanguage].msgError); 
+                    showMsg(languageMap[currentLanguage].msgError); closeModal('importModal'); 
                 }
-
             } catch(err) {
                 console.error("IMPORT ERROR:", err);
-                showMsg(languageMap[currentLanguage].msgError);
+                showMsg("System Error"); closeModal('importModal');
             }
         }
 
-        function addRow(s=null) {
-            const id = s && s.id ? s.id : Math.random().toString(36).substr(2, 5);
-            const ph = languageMap[currentLanguage].rowLabel;
-            const div = document.createElement('div'); div.className = 'row'; div.dataset.id = id;
-            const isChain = s ? (s.baseMode==='chain') : true; 
-            const val = s ? s.multiplier : '';
-
-            div.innerHTML = `
-                <input type="text" class="text-label-input" placeholder="${ph}" value="${s?s.label:''}" oninput="saveSettings()">
-                <div class="calc-area">
-                    <div id="base-${id}" class="base-toggle ${isChain?'chain':''}" onclick="this.classList.toggle('chain');this.textContent=this.classList.contains('chain')?'🔗':'🏠';updateDisplay()">
-                        ${isChain?'🔗':'🏠'}
-                    </div>
-                    <div class="operator-group">
-                        <div class="operator-control" onclick="changeOp('${id}',1)">▲</div>
-                        <div class="operator-display" id="op-${id}">${s?s.operator:'+'}</div>
-                        <div class="operator-control" onclick="changeOp('${id}',-1)">▼</div>
-                    </div>
-                    <input type="number" step="any" class="multiplier-input" value="${val}" placeholder="" oninput="updateDisplay()">
-                    <div class="percent-toggle ${s&&s.isPercentActive?'active':''}" onclick="this.classList.toggle('active');updateDisplay()">%</div>
-                </div>
-                <div class="result-area">
-                    <div class="result-text">0</div>
-                    <div style="display:flex; gap:10px;">
-                        <button class="action-btn" onclick="copyRowVal(this)">📋</button>
-                        <button class="action-btn" onclick="this.closest('.row').remove();updateDisplay()">🗑️</button>
-                    </div>
-                </div>
-            `;
-            document.getElementById('rows-container').appendChild(div); 
-            updateDisplay(); 
-        }
-
-        function changeOp(id, d) { 
-            const ops = ['+','-','×','÷']; 
-            const el = document.getElementById('op-'+id);
-            const currentOp = el.textContent.trim();
-            el.textContent = ops[(ops.indexOf(currentOp) + d + 4) % 4]; 
-            updateDisplay(); 
-        }
-
-        function copyRowVal(btn) { 
-            navigator.clipboard.writeText(btn.closest('.result-area').querySelector('.result-text').textContent.replace(/,/g,'')); 
-            showMsg(languageMap[currentLanguage].copyMsg); 
-        }
-
-        // ★無料版と同じ、テキスト解析ロジック
         function tryParseText(text) {
-             const purifiedText = text
-                .replace(/\u00A0/g, " ")
-                .replace(/[\u200B\u200E\uFEFF\u202A-\u202E]/g, "");
-
+            const purifiedText = text.replace(/\u00A0/g, " ").replace(/\u200B/g, "").replace(/\u200E/g, "");
             const lines = purifiedText.trim().split(/\r?\n/);
             if (lines.length < 1) return false;
             let name = ""; let base = 0; let rows = []; let startRowIdx = 0;
+            
             const titleMatch = lines[0].match(/【(.*?)】/);
             if (titleMatch) { name = titleMatch[1]; startRowIdx = 1; } 
             else if (!isNaN(parseFloat(lines[0])) && lines[0].trim().match(/^[\d\.-]+$/)) { base = parseFloat(lines[0]); startRowIdx = 1; } 
@@ -798,28 +944,22 @@ const shareUrl = "https://thejetdev.github.io/Simple-Sheet/?data=" + encodeURICo
             if (startRowIdx < lines.length) {
                 const rowText = lines[startRowIdx];
                 const baseValMatch = rowText.match(/[\d\.-]+/);
-                if (rowText.includes("Base") || rowText.includes("元") || rowText.includes("Initial") || (!rowText.includes("\t") && baseValMatch)) {
-                    if (baseValMatch) base = parseFloat(baseValMatch[0]);
-                    startRowIdx++;
+                if (rowText.includes("Base") || rowText.includes("元") || (!rowText.includes("\t") && baseValMatch)) {
+                    if (baseValMatch) base = parseFloat(baseValMatch[0]); startRowIdx++;
                 }
             }
 
-            let readingMemo = false;
-            let memoContent = "";
-
+            let readingMemo = false; let memoContent = "";
             for (let i = startRowIdx; i < lines.length; i++) {
                 const line = lines[i].trim(); if (!line) continue;
-                if (line.includes("[Memo]") || line.includes("▼ DATA CODE")) { readingMemo = true; continue; }
+                if (line.includes("[Memo]") || line.includes("[Memo ]") || line.includes("▼ DATA CODE")) { readingMemo = true; continue; }
                 if (readingMemo) { 
                     if(line.includes("▼ DATA CODE")) break; 
-                    if (!line.startsWith("Link\t")) {
-                        memoContent += line + "\n"; 
-                    }
+                    if (!line.startsWith("Link\t")) memoContent += line + "\n"; 
                     continue; 
                 }
 
                 let parts = line.split(/\t+/); if (parts.length < 2) parts = line.split(/\s{2,}/);
-                
                 if (parts.length >= 2) {
                     let valStr = parts[parts.length-1].replace(/,/g, '');
                     if (!isNaN(parseFloat(valStr))) {
@@ -836,29 +976,47 @@ const shareUrl = "https://thejetdev.github.io/Simple-Sheet/?data=" + encodeURICo
             document.getElementById('memoArea').value = memoContent.trim();
             updateMemoLinks();
             document.getElementById('rows-container').innerHTML = "";
-            rows.forEach(r => addRow(r)); updateDisplay();
+            rows.forEach(r => addRow(r)); 
+            updateDisplay();
             return true;
         }
 
-        function calcInput(v) { if(v === 'AC') { currentCalc = "0"; } else if(v === 'BS') { currentCalc = currentCalc.length > 1 ? currentCalc.slice(0, -1) : "0"; } else { if(currentCalc === "0" && v !== ".") currentCalc = v; else currentCalc += v; } document.getElementById('calcDisplay').value = currentCalc; }
-        function calcResult() { try { let expression = currentCalc.replace(/×/g, '*').replace(/÷/g, '/').replace(/%/g, '/100'); let res = eval(expression); currentCalc = stripError(res).toString(); } catch(e) { currentCalc = "Error"; } document.getElementById('calcDisplay').value = currentCalc; }
+        function calcInput(v) { 
+            if(v === 'AC') currentCalc = "0"; 
+            else if(v === 'BS') currentCalc = currentCalc.length > 1 ? currentCalc.slice(0, -1) : "0"; 
+            else { if(currentCalc === "0" && v !== ".") currentCalc = v; else currentCalc += v; }
+            document.getElementById('calcDisplay').value = currentCalc; 
+        }
+        function calcResult() { 
+            try { 
+                let res = eval(currentCalc.replace(/×/g, '*').replace(/÷/g, '/').replace(/%/g, '/100')); 
+                currentCalc = stripError(res).toString();
+            } catch(e) { currentCalc = "Error"; } 
+            document.getElementById('calcDisplay').value = currentCalc; 
+        }
         function copyCalcResult() { navigator.clipboard.writeText(document.getElementById('calcDisplay').value); showMsg(languageMap[currentLanguage].copyMsg); }
         function toggleCalc() { document.getElementById('sideCalc').classList.toggle('active'); }
-        function clearNumbers() { document.getElementById('masterInput').value = ""; document.querySelectorAll('.multiplier-input').forEach(i => i.value = ""); document.getElementById('memoArea').value = ""; updateMemoLinks(); updateDisplay(); }
-        function fullReset() { if(confirm(languageMap[currentLanguage].confirmReset)) { localStorage.removeItem('simpleSheetSettings_pro'); location.reload(); } }
+        
+        function fullReset() { 
+            if(confirm(languageMap[currentLanguage].confirmReset)) { 
+                document.getElementById('masterLabel').value = ""; 
+                document.getElementById('masterInput').value = ""; 
+                document.getElementById('memoArea').value = ""; 
+                document.getElementById('rows-container').innerHTML = ""; 
+                addRow(); 
+                updateMemoLinks(); 
+                updateDisplay(); 
+            } 
+        }
+        
         function showMsg(t) { const m = document.getElementById('saveMessage'); m.textContent = t; m.style.opacity = 1; setTimeout(() => m.style.opacity = 0, 1500); }
 
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW failed', err));
-            });
+            window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW failed', err)); });
         }
     </script>
 </body>
 </html>
-
-
-
 
 
 
