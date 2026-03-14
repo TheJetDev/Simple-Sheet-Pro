@@ -413,12 +413,14 @@
                   shareMore: "...und {N} weitere", memoHeader: "[ Notiz ]", editLinkText: "▽ In Simple Sheet bearbeiten ▽"}
         };
 
-        function init() {
+        async function init() {
+            // 1. プロ版の判定
             if (localStorage.getItem("proWebUnlocked") === "true") {
                 isPro = true;
                 document.body.classList.add("pro-mode");
             }
 
+            // 2. 言語ボタンの生成
             const langCont = document.getElementById('langContainer');
             Object.keys(languageMap).forEach(lang => {
                 const btn = document.createElement('button');
@@ -428,10 +430,24 @@
                 langCont.appendChild(btn);
             });
 
+            // 3. URLパラメータの解析
             const params = new URLSearchParams(window.location.search);
-            let urlData = params.get('data');
+            let shareId = params.get('s');    // 短縮URL用 (?s=abc123)
+            let urlData = params.get('data'); // 従来の長いURL用
 
-            if (urlData) {
+            // 4. データの読み込みロジック（ここがサーバー対応！）
+            if (shareId && window.getFirebaseData) {
+                showMsg("Loading...");
+                const data = await window.getFirebaseData(shareId);
+                if (data) {
+                    applyData(data);
+                    showMsg("Loaded!");
+                } else {
+                    showMsg("Link expired.");
+                    addRow();
+                }
+            } else if (urlData) {
+                // 従来のSS方式（SS3, SS2, SS1）の解析
                 if (urlData.startsWith('SS3:')) {
                     try {
                         const compressed = urlData.substring(4);
@@ -455,6 +471,7 @@
                 }
                 window.history.replaceState({}, document.title, window.location.pathname);
             } else {
+                // どちらもなければローカル保存から復元
                 const savedDataStr = localStorage.getItem('simpleSheetSettings_integrated') || localStorage.getItem('simpleSheetSettings_pro');
                 if (savedDataStr) {
                     try {
@@ -465,9 +482,9 @@
                 } else { addRow(); }
             }
 
+            // 5. 言語とUIの仕上げ
             let savedLang = localStorage.getItem('simpleSheetLang_integrated') || 'en';
             setLanguage(savedLang); 
-            
             applyModeUI(); 
             if(isPro) renderSaveList();
             updateMemoLinks();
@@ -478,27 +495,6 @@
                 animation: 150,
                 onEnd: function() { updateDisplay(); }
             });
-        }
-
-        function applyModeUI() {
-            const memoArea = document.getElementById('memoArea');
-            const unlockCont = document.getElementById('btnUnlockProContainer');
-            const btnCopyAllTop = document.getElementById('btnCopyAllTop');
-            const d = languageMap[currentLanguage] || languageMap['en'];
-            
-            if (isPro) {
-                document.getElementById('title').textContent = d.title + " PRO";
-                memoArea.readOnly = false;
-                unlockCont.style.display = "none";
-                document.getElementById('btnCopyAllText').innerHTML = d.btnCopyAll;
-                btnCopyAllTop.style.background = "#6f42c1"; 
-            } else {
-                document.getElementById('title').textContent = d.title;
-                memoArea.readOnly = true;
-                unlockCont.style.display = "block";
-                document.getElementById('btnCopyAllText').innerHTML = d.btnCopyAll + " <small>🔒Pro</small>";
-                btnCopyAllTop.style.background = "#6c757d";
-            }
         }
 
         function handleMemoClick() { if (!isPro) triggerProPromo(); }
