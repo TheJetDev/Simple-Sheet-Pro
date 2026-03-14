@@ -323,7 +323,7 @@
             de: "So verwenden Sie Simple Sheet\n\nÜbersichtlicher als ein Taschenrechner,\nEinfacher als eine Tabellenkalkulation.\n\nSimple Sheet ist eine App, mit der Sie den \"Fluss\" Ihrer Berechnungen beibehalten können.\n\nAddieren, subtrahieren, multiplizieren, dividieren.\nSie können es mit nur diesen 4 Grundrechenarten verwenden.\n\n【Berechnungsmodi】\n\nTippen Sie auf die Schaltfläche, um die Berechnungsbasis umzuschalten.\n\n🏠 Basis\nBerechnet unter Verwendung der \"Basis\"-Zahl oben.\n\n🔗 Kette\nBerechnet durch Übernahme des Ergebnisses aus der vorherigen Zeile.\n\n【Teilen und Exportieren】\n\nMit Simple Sheet können Sie Ihre Berechnungen direkt an andere senden.\n\n📱 Teilen (Share)\nAn andere senden / Gemeinsam ansehen\n\nVerwenden Sie dies, wenn Sie Berechnungen über Messaging-Apps, E-Mails oder soziale Netzwerke teilen.\n\nWenn Sie auf Teilen drücken, werden die folgenden zwei Dinge kopiert:\n- Eine Textzusammenfassung des Prozesses, bis zu 5 Zeilen\n- Eine URL zur Wiederherstellung der Berechnung\n\nDer Empfänger kann dasselbe Berechnungsblatt öffnen, indem er einfach auf die URL tippt.\nEr kann den Inhalt überprüfen oder für den eigenen Gebrauch bearbeiten.\n\n📋 Alles Kopieren (Copy All)\nZum Speichern, für KI und Daten *Pro-Version\n\nKopiert alle Berechnungsdaten ohne Auslassung.\n\nKopierter Inhalt:\n- Alle Berechnungsergebnisse\n- Notizen\n- Wiederherstellungs-URL\n\nDas Einfügen in Excel formatiert es automatisch in eine 3-Spalten-Tabelle.\nSie können dies auch verwenden, um Berechnungen in KIs wie ChatGPT einzuspeisen.\n\n【Importieren】\n\nNormalerweise stellt das bloße Öffnen der freigegebenen URL das Blatt automatisch wieder her.\n\nWenn die URL nicht funktioniert, kopieren Sie den freigegebenen Text und fügen Sie ihn hier ein.\n\nSelbst wenn davor oder danach Begrüßungen oder andere Texte stehen, extrahiert die App nur die Daten und stellt sie wieder her.\n\n【Haftungsausschluss】\n\nDer Inhalt des Notizfeldes stammt vom Autor selbst.\nBitte verwenden Sie geteilte Links nach eigenem Ermessen und in eigener Verantwortung."
         };
 
-        // ★ 機能制限の説明に「メモ帳の書き込み」と、各言語の「コピー機能名」を反映
+        // ★ 機能制限の説明に「メモ帳の書き込み」と、各言語の「コピー機能名」をしっかり反映
         const manualFooterFree = { 
             ja: "【機能制限について】\n保存、メモ帳への書き込み、オールコピー機能はPro版限定です。",
             en: "【Feature Limitations】\nSaving, memo editing, and Copy All are Pro version features.",
@@ -344,10 +344,11 @@
             de: "【Pro-Version】\nAlle Funktionen freigeschaltet."
         };
 
+        // ★ ボタン名や Edit Link テキストも各言語に完全対応
         const languageMap = {
             en: { title: "Simple Sheet", masterLabelName: "Title", baseName: "Base", rowLabel: "Item Name", copyMsg: "Copied!", btnImport: "Imp", btnReset: "Reset", confirmReset: "Reset all?", addRow: "+ Row", btnShare: "📱 Share", btnCopyAll: "Copy All", calcTitle: "Calculator", btnSave: "💾 Save",
                   btnHelp: "❓ Help", btnClose: "Close", msgSave: "Saved!", msgLoad: "Loaded!", confirmDel: "Delete?", msgError: "Error", impTitle:"Import Data", impDesc:"Paste data here:", btnLoad:"Load Data", memoTitle: "📝 MEMO",
-                  proTitle: "Get Pro Version 💎", proDesc: "Save, Memo editing, and Copy All are Pro features.", proBtn: "Go to App Store", btnProLink: "🚀 How to get Pro?",
+                  proTitle: "Get Pro Version 💎", proDesc: "Saving, Memo editing, and Copy All are Pro features.", proBtn: "Go to App Store", btnProLink: "🚀 How to get Pro?",
                   shareMore: "...and {N} more", memoHeader: "[ Memo ]", editLinkText: "▽ Edit in Simple Sheet ▽"},
             ja: { title: "Simple Sheet", masterLabelName: "タイトル", baseName: "基準", rowLabel: "項目名", copyMsg: "コピー完了", btnImport: "読込", btnReset: "初期化", confirmReset: "全削除しますか？", addRow: "+ 行を追加", btnShare: "📱 シェア", btnCopyAll: "オールコピー", calcTitle: "電卓", btnSave: "💾 記憶",
                   btnHelp: "❓ ヘルプ", btnClose: "閉じる", msgSave: "保存しました", msgLoad: "読み込みました", confirmDel: "削除しますか？", msgError: "エラー", impTitle:"データの読込", impDesc:"ここにデータを貼り付け:", btnLoad:"読込開始", memoTitle: "📝 メモ",
@@ -355,31 +356,31 @@
                   shareMore: "...他 {N} 項目", memoHeader: "[ メモ ]", editLinkText: "▽ Simple Sheet で編集 ▽"},
             zh: { title: "Simple Sheet", masterLabelName: "标题", baseName: "初始值", rowLabel: "项目名称", copyMsg: "已复制", btnImport: "导入", btnReset: "重置", confirmReset: "确认重置所有数据？", addRow: "+ 添加行", btnShare: "📱 分享", btnCopyAll: "全部复制", calcTitle: "计算器", btnSave: "💾 保存",
                   btnHelp: "❓ 帮助", btnClose: "关闭", msgSave: "已保存", msgLoad: "已加载", confirmDel: "删除？", msgError: "错误", impTitle:"导入数据", impDesc:"粘贴代码:", btnLoad:"加载", memoTitle: "📝 备忘录",
-                  proTitle: "Pro版功能 💎", proDesc: "购买应用以获取完整功能。", proBtn: "去商店", btnProLink: "🚀 如何获取Pro?",
+                  proTitle: "Pro版功能 💎", proDesc: "保存、编辑备忘录和全部复制是 Pro 版功能。", proBtn: "去商店", btnProLink: "🚀 如何获取Pro?",
                   shareMore: "...及其他 {N} 项", memoHeader: "[ 备忘录 ]", editLinkText: "▽ 在 Simple Sheet 中编辑 ▽"},
             ko: { title: "Simple Sheet", masterLabelName: "제목", baseName: "기준값", rowLabel: "항목 이름", copyMsg: "복사됨", btnImport: "가져오기", btnReset: "초기화", confirmReset: "전체 초기화하시겠습니까?", addRow: "+ 행 추가", btnShare: "📱 공유", btnCopyAll: "전체 복사", calcTitle: "계산기", btnSave: "💾 저장",
                   btnHelp: "❓ 도움말", btnClose: "닫기", msgSave: "저장됨", msgLoad: "로드됨", confirmDel: "삭제?", msgError: "오류", impTitle:"데이터 가져오기", impDesc:"코드 붙여넣기:", btnLoad:"로드", memoTitle: "📝 메모",
-                  proTitle: "Pro 기능 💎", proDesc: "Pro 버전을 구매하여 기능을 해제하세요.", proBtn: "스토어로 이동", btnProLink: "🚀 Pro 버전 받기",
+                  proTitle: "Pro 기능 💎", proDesc: "저장, 메모 작성 및 전체 복사는 Pro 기능입니다.", proBtn: "스토어로 이동", btnProLink: "🚀 Pro 버전 받기",
                   shareMore: "...외 {N}개 항목", memoHeader: "[ 메모 ]", editLinkText: "▽ Simple Sheet에서 편집 ▽"},
             es: { title: "Simple Sheet", masterLabelName: "Título", baseName: "Base", rowLabel: "Nombre del ítem", copyMsg: "¡Copiado!", btnImport: "Imp", btnReset: "Reiniciar", confirmReset: "¿Reiniciar todo?", addRow: "+ Fila", btnShare: "📱 Compartir", btnCopyAll: "Copiar Todo", calcTitle: "Calculadora", btnSave: "💾 Guardar",
                   btnHelp: "❓ Ayuda", btnClose: "Cerrar", msgSave: "¡Guardado!", msgLoad: "¡Cargado!", confirmDel: "¿Eliminar?", msgError: "Error", impTitle:"Importar", impDesc:"Pegar código:", btnLoad:"Cargar", memoTitle: "📝 Nota",
-                  proTitle: "Función Pro 💎", proDesc: "Compre la app para obtener funciones Pro.", proBtn: "Ir a la tienda", btnProLink: "🚀 Obtener Pro",
+                  proTitle: "Función Pro 💎", proDesc: "Guardar, editar notas y Copiar Todo son funciones Pro.", proBtn: "Ir a la tienda", btnProLink: "🚀 Obtener Pro",
                   shareMore: "...y {N} más", memoHeader: "[ Nota ]", editLinkText: "▽ Editar en Simple Sheet ▽"},
             pt: { title: "Simple Sheet", masterLabelName: "Título", baseName: "Base", rowLabel: "Nome do Item", copyMsg: "Copiado!", btnImport: "Imp", btnReset: "Reset", confirmReset: "Reiniciar tudo?", addRow: "+ Linha", btnShare: "📱 Compartilhar", btnCopyAll: "Copiar Tudo", calcTitle: "Calculadora", btnSave: "💾 Salvar",
                   btnHelp: "❓ Ajuda", btnClose: "Fechar", msgSave: "Salvo", msgLoad: "Carregado", confirmDel: "Excluir?", msgError: "Erro", impTitle:"Importar", impDesc:"Cole o código:", btnLoad:"Carregar", memoTitle: "📝 Nota",
-                  proTitle: "Recurso Pro 💎", proDesc: "Compre o app para obter recursos Pro.", proBtn: "Ir para loja", btnProLink: "🚀 Obter Pro",
+                  proTitle: "Recurso Pro 💎", proDesc: "Salvar, editar notas e Copiar Tudo são recursos Pro.", proBtn: "Ir para loja", btnProLink: "🚀 Obter Pro",
                   shareMore: "...e mais {N}", memoHeader: "[ Nota ]", editLinkText: "▽ Editar no Simple Sheet ▽"},
             fr: { title: "Simple Sheet", masterLabelName: "Titre", baseName: "Base", rowLabel: "Nom de l'élément", copyMsg: "Copié !", btnImport: "Imp", btnReset: "Rétablir", confirmReset: "Tout réinitialiser ?", addRow: "+ Ligne", btnShare: "📱 Partager", btnCopyAll: "Tout Copier", calcTitle: "Calculatrice", btnSave: "💾 Enreg.",
                   btnHelp: "❓ Aide", btnClose: "Fermer", msgSave: "Enregistré", msgLoad: "Chargé", confirmDel: "Supprimer ?", msgError: "Erreur", impTitle:"Importer", impDesc:"Coller code:", btnLoad:"Charger", memoTitle: "📝 Note",
-                  proTitle: "Fonctionnalité Pro 💎", proDesc: "Achetez l'app pour les fonctions Pro.", proBtn: "Aller au store", btnProLink: "🚀 Obtenir Pro",
+                  proTitle: "Fonctionnalité Pro 💎", proDesc: "L'enregistrement, la note et Tout Copier sont des fonctions Pro.", proBtn: "Aller au store", btnProLink: "🚀 Obtenir Pro",
                   shareMore: "...et {N} de plus", memoHeader: "[ Note ]", editLinkText: "▽ Modifier dans Simple Sheet ▽"},
             ru: { title: "Simple Sheet", masterLabelName: "Название", baseName: "База", rowLabel: "Имя элемента", copyMsg: "Скопировано!", btnImport: "Имп", btnReset: "Сброс", confirmReset: "Сбросить всё?", addRow: "+ Ряд", btnShare: "📱 Поделиться", btnCopyAll: "Копировать все", calcTitle: "Калькулятор", btnSave: "💾 Сохр.",
                   btnHelp: "❓ Помощь", btnClose: "Закрыть", msgSave: "Сохранено!", msgLoad: "Загружено!", confirmDel: "Удалить?", msgError: "Ошибка", impTitle:"Импорт", impDesc:"Вставьте код:", btnLoad:"Загрузить", memoTitle: "📝 Заметка",
-                  proTitle: "Pro Версия 💎", proDesc: "Купите приложение для доступа к Pro.", proBtn: "В магазин", btnProLink: "🚀 Получить Pro",
+                  proTitle: "Pro Версия 💎", proDesc: "Сохранение, заметки и Копировать все — функции Pro.", proBtn: "В магазин", btnProLink: "🚀 Получить Pro",
                   shareMore: "...и еще {N}", memoHeader: "[ Заметка ]", editLinkText: "▽ Редактировать в Simple Sheet ▽"},
             de: { title: "Simple Sheet", masterLabelName: "Titel", baseName: "Basis", rowLabel: "Elementname", copyMsg: "Kopiert!", btnImport: "Imp", btnReset: "Reset", confirmReset: "Alles zurücksetzen?", addRow: "+ Zeile", btnShare: "📱 Teilen", btnCopyAll: "Alles Kopieren", calcTitle: "Rechner", btnSave: "💾 Speichern",
                   btnHelp: "❓ Hilfe", btnClose: "Schließen", msgSave: "Gespeichert!", msgLoad: "Geladen!", confirmDel: "Löschen?", msgError: "Fehler", impTitle:"Importieren", impDesc:"Code hier einfügen:", btnLoad:"Laden", memoTitle: "📝 Notiz",
-                  proTitle: "Pro-Funktion 💎", proDesc: "Kaufen Sie die App für Pro-Zugang.", proBtn: "Zum Store", btnProLink: "🚀 Pro holen",
+                  proTitle: "Pro-Funktion 💎", proDesc: "Speichern, Notizen und Alles Kopieren sind Pro-Funktionen.", proBtn: "Zum Store", btnProLink: "🚀 Pro holen",
                   shareMore: "...und {N} weitere", memoHeader: "[ Notiz ]", editLinkText: "▽ In Simple Sheet bearbeiten ▽"}
         };
 
@@ -955,7 +956,6 @@
                     }
                 }
 
-                // 生JSONフォールバック
                 let cleanText = rawText.replace(/\u00A0/g, " ").replace(/[\u200B\u200E\uFEFF\u202A-\u202E]/g, "").replace(/[“”]/g, '"').replace(/```json/gi, "").replace(/```/g, "").trim();
                 const marker = "▼ DATA CODE ▼";
                 if (cleanText.includes(marker)) cleanText = cleanText.split(marker)[1].trim();
